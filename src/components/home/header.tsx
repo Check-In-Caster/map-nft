@@ -78,7 +78,7 @@ const Navigation = ({ mobileNav }: { mobileNav?: boolean }) => {
     setAddress(wallet.address);
   }, [wallet.address]);
 
-  const handleMyStatsClick = () => {
+  const handleMyMapsClick = () => {
     if (!address) {
       try {
         (
@@ -102,52 +102,35 @@ const Navigation = ({ mobileNav }: { mobileNav?: boolean }) => {
     }
   }, [searchParams, ref]);
 
-  if (!mobileNav)
-    return (
-      <>
-        <NavLink
-          label="My Portfolio"
-          href={address ? `/stats/${address}` : undefined}
-          onClick={handleMyStatsClick}
-        />
-        <NavLink label="Leaderboard" href="/leaderboard" />
-        <NavLink
-          label="Litepaper"
-          href="https://checkin.gitbook.io/"
-          external
-        />
-        <NavLink label="Checkin app" href="https://www.checkin.gg/" external />
-        <div className="bg-[#EF9854] min-h-[48px] w-full grid place-items-center connect-wallet">
+  return (
+    <>
+      <NavLink
+        label="My Maps"
+        href={address ? `/maps/${address}` : undefined}
+        onClick={handleMyMapsClick}
+        mobile={mobileNav}
+      />
+      <NavLink
+        label="Checkin App"
+        href="https://www.checkin.gg/"
+        external
+        mobile={mobileNav}
+      />
+      <NavLink
+        label="Property NFTs"
+        href="https://property.checkin.gg/"
+        external
+        mobile={mobileNav}
+      />
+      {!mobileNav && (
+        <div className="bg-[#5844C1] min-h-[48px] w-full grid place-items-center connect-wallet">
           <ConnectButton
             showBalance={false}
             accountStatus={"address"}
             chainStatus={"icon"}
           />
         </div>
-      </>
-    );
-
-  return (
-    <>
-      <NavLink
-        label="My Portfolio"
-        href={address ? `/stats/${address}` : undefined}
-        onClick={handleMyStatsClick}
-        mobile
-      />
-      <NavLink label="Leaderboard" href="/leaderboard" mobile />
-      <NavLink
-        label="Litepaper"
-        href="https://checkin.gitbook.io/"
-        external
-        mobile
-      />
-      <NavLink
-        label="Checkin app"
-        href="https://www.checkin.gg/"
-        external
-        mobile
-      />
+      )}
     </>
   );
 };
@@ -190,8 +173,11 @@ const Header = () => {
           passHref
           className="flex text-center justify-center items-center w-full px-5 border-r border-gray-900 h-[48px]"
         >
-          <img src="/assets/images/logo.svg" className="w-20 h-auto" />{" "}
-          <span className="text-xs relative pt-3">Property NFTs</span>
+          <div className="flex justify-center items-end">
+            <span className="text-[#5844C1] text-2xl">MAPs</span>
+            <span className="ml-1 mr-0.5">by</span>
+            <img src="/assets/images/logo.svg" className="h-5 w-auto" />
+          </div>
         </Link>
         <Suspense fallback={<div>Loading</div>}>
           <Navigation />

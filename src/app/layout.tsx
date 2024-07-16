@@ -6,7 +6,7 @@ import Applayout from "./Applayout";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Onchain Property NFTs - Checkin “Checkin and Earn”",
+  title: "MAPs - Checkin “Checkin and Earn”",
   description:
     "With Property NFTs, you can own NFTs of your favourite properties from famous places like Eiffel Tower or your local cafe!",
   twitter: {
@@ -25,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="bg-custom-gray-30">
       <body className={`${coolvetica.className} tracking-wider`}>
         <Applayout>{children}</Applayout>
       </body>

@@ -5,15 +5,14 @@
 /* Chrome, Safari, Edge, Opera */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 /* Firefox */
 input[type="number"] {
-    -moz-appearance: textfield;
+  -moz-appearance: textfield;
 }
-
 
 body {
   color: rgb(var(--foreground-rgb));
@@ -43,8 +42,8 @@ body {
 }
 
 .connect-wallet button {
-  color: #000 !important;
-  background: #ec9653 !important;
+  color: #fff !important;
+  background: #5844c1 !important;
   box-shadow: none !important;
 }
 

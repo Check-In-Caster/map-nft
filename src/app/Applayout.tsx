@@ -17,16 +17,16 @@ import { http, WagmiProvider } from "wagmi";
 import { base } from "wagmi/chains";
 
 export const metadata: Metadata = {
-  title: "Onchain Property",
+  title: "Maps by Checkin",
   description: "",
 };
 
 const getSiweMessageOptions: GetSiweMessageOptions = () => ({
-  statement: "Sign in to Onchain Property!",
+  statement: "Sign in to Maps by Checkin!",
 });
 
 const config = getDefaultConfig({
-  appName: "Onchain Property",
+  appName: "Maps by Checkin",
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
   chains: [base],
   transports: {
@@ -56,7 +56,7 @@ const Applayout = ({
           <div className="bg-custom-gray-30 text-[#000] pb-8">
             {pathName !== "/maintenance" ? (
               <>
-                <FreeOnChainBanner />
+                {/* <FreeOnChainBanner /> */}
                 <Header />
               </>
             ) : null}
