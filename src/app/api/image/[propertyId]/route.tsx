@@ -1,21 +1,5 @@
-import OpenLocationCode from "@/lib/openlocationcode";
-import { prisma } from "@/lib/prisma";
 import { ImageResponse } from "@vercel/og";
 import { NextRequest } from "next/server";
-
-const TextInfo = ({ label }: { label: string | null | undefined }) => {
-  return (
-    <div
-      style={{
-        marginTop: "18px",
-        fontWeight: "bold",
-      }}
-      className="flex flex-col text-3xl mt-10 pt-6"
-    >
-      {label}
-    </div>
-  );
-};
 
 export async function GET(
   req: NextRequest,
@@ -25,56 +9,49 @@ export async function GET(
     };
   }
 ) {
-  const property = await prisma.propertyInfo.findFirst({
-    where: {
-      property_id: props.params.propertyId,
-    },
-    include: {
-      Locations: true,
-    },
-  });
-
-  const coordinates = property?.Locations?.coordinates as {
-    lat: number;
-    lng: number;
-  };
-
-  const openLocationCode = new OpenLocationCode();
-
-  const longPlusCode = openLocationCode.encode(
-    coordinates.lat,
-    coordinates.lng,
-    10
-  );
-  const shortPlusCode = openLocationCode.shorten(
-    longPlusCode,
-    coordinates.lat.toFixed(1),
-    coordinates.lng.toFixed(1)
-  );
-
-  console.log(shortPlusCode);
-  let address = property?.Locations?.address ?? "";
-  let firstCommaIndex = address.indexOf(",");
-  let result = address.slice(firstCommaIndex + 1).trim();
+  // const property = await prisma.propertyInfo.findFirst({
+  //   where: {
+  //     property_id: props.params.propertyId,
+  //   },
+  //   include: {
+  //     Locations: true,
+  //   },
+  // });
 
   const imageResponse = new ImageResponse(
     (
-      <div tw="flex flex-col  p-4 bg-black w-full h-full text-white text-2xl font-medium relative">
-        <TextInfo label={property?.country} />
-        <TextInfo label={property?.Locations?.category} />
-        <TextInfo label={result ?? ""} />
-        <TextInfo label={shortPlusCode} />
-        <TextInfo label={`${coordinates.lat} ${coordinates?.lng}`} />
-        <TextInfo
-          label={
-            Number(property?.score) != 0 ? String(property?.score ?? "") : ""
-          }
+      <div tw="flex flex-col w-full justify-center items-center  p-4 bg-white w-full h-full text-white text-2xl font-medium relative">
+        <img
+          width={72}
+          height={72}
+          src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f35c.png"
+          alt=""
         />
+
+        <div
+          style={{
+            marginTop: "18px",
+            fontSize: "54px",
+            fontWeight: "bold",
+            color: "black",
+          }}
+          className="flex flex-col text-8xl mt-10 pt-6"
+        >
+          Top 10 Ramen in Tokyo
+        </div>
+
+        <div
+          className="text-[#000] flex justify-start"
+          style={{ color: "#000" }}
+        >
+          User
+        </div>
       </div>
     ),
     {
       width: 681,
       height: 681,
+      debug: true,
       headers: {
         "Cache-Control": "public, max-age=86400, immutable",
       },
