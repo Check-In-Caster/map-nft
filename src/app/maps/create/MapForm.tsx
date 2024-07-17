@@ -129,6 +129,8 @@ const MapForm = ({
     router.push(`/map/${response.map_id}`);
   };
 
+  const emojiValue = form.watch("emoji");
+
   return (
     <div className="mt-8 w-full max-w-7xl mx-auto mb-8 p-4 md:p-0">
       <div className="text-center text-2xl md:text-4xl my-10">{heading}</div>
@@ -167,25 +169,23 @@ const MapForm = ({
 
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline">Map Emoji</Button>
+                  <Button variant="outline">
+                    {emojiValue ? (
+                      <img src={emojiValue} className="w-6 h-6 mr-4" />
+                    ) : null}
+                    Map Emoji
+                  </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full">
-                  <EmojiPicker emojiStyle={EmojiStyle.TWITTER} />
+                  <EmojiPicker
+                    emojiStyle={EmojiStyle.TWITTER}
+                    onEmojiClick={(e) => {
+                      console.log(e.imageUrl);
+                      form.setValue("emoji", e.imageUrl);
+                    }}
+                  />
                 </PopoverContent>
               </Popover>
-
-              <FormField
-                control={form.control}
-                name="emoji"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Map Emoji</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
 
               <div>
                 {fields.map((item, index) => (

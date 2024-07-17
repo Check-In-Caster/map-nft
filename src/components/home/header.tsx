@@ -106,7 +106,7 @@ const Navigation = ({ mobileNav }: { mobileNav?: boolean }) => {
     <>
       <NavLink
         label="My Maps"
-        href={address ? `/maps/${address}` : undefined}
+        href={address ? `/my-maps/${address}` : undefined}
         onClick={handleMyMapsClick}
         mobile={mobileNav}
       />
