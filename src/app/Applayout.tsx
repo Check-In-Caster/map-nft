@@ -4,12 +4,13 @@ import "@rainbow-me/rainbowkit/styles.css";
 import type { Metadata } from "next";
 import React from "react";
 
-import FreeOnChainBanner from "@/components/home/banner";
 import Footer from "@/components/home/footer";
 import Header from "@/components/home/header";
 import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { RainbowKitSiweNextAuthProvider } from "@rainbow-me/rainbowkit-siwe-next-auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Session } from "next-auth";
+import { SessionProvider } from "next-auth/react";
 
 import { usePathname } from "next/navigation";
 import { Toaster } from "sonner";
@@ -47,31 +48,31 @@ const Applayout = ({
 
   return (
     <WagmiProvider config={config}>
-      {/* <SessionProvider refetchInterval={0} session={session}> */}
-      <QueryClientProvider client={queryClient}>
-        {/* <RainbowKitSiweNextAuthProvider
+      <SessionProvider refetchInterval={0} session={session}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitSiweNextAuthProvider
             getSiweMessageOptions={getSiweMessageOptions}
-          > */}
-        <RainbowKitProvider initialChain={base.id}>
-          <div className="bg-custom-gray-30 text-[#000] pb-8">
-            {pathName !== "/maintenance" ? (
-              <>
-                {/* <FreeOnChainBanner /> */}
-                <Header />
-              </>
-            ) : null}
-            {children}
-            {pathName !== "/maintenance" ? (
-              <>
-                <Footer />{" "}
-              </>
-            ) : null}
-            <Toaster position="top-center" />
-          </div>
-        </RainbowKitProvider>
-        {/* </RainbowKitSiweNextAuthProvider> */}
-      </QueryClientProvider>
-      {/* </SessionProvider> */}
+          >
+            <RainbowKitProvider initialChain={base.id}>
+              <div className="bg-custom-gray-30 text-[#000] pb-8">
+                {pathName !== "/maintenance" ? (
+                  <>
+                    {/* <FreeOnChainBanner /> */}
+                    <Header />
+                  </>
+                ) : null}
+                {children}
+                {pathName !== "/maintenance" ? (
+                  <>
+                    <Footer />{" "}
+                  </>
+                ) : null}
+                <Toaster position="top-center" />
+              </div>
+            </RainbowKitProvider>
+          </RainbowKitSiweNextAuthProvider>
+        </QueryClientProvider>
+      </SessionProvider>
     </WagmiProvider>
   );
 };

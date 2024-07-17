@@ -254,16 +254,17 @@ model Maps {
   thumbnail      String?
   wallet_address String
   map_emoji      String?
-  token_id       String
+  token_id       String?
   MapsCollected  MapsCollected[]
   MapsLiked      MapsLiked[]
   MapsPlaces     MapsPlaces[]
 }
 
 model MapsPlaces {
-  map_id      String @db.Uuid
-  location_id String @db.Uuid
-  map         Maps   @relation(fields: [map_id], references: [map_id])
+  map_id      String  @db.Uuid
+  location_id String  @db.Uuid
+  description String?
+  map         Maps    @relation(fields: [map_id], references: [map_id])
 
   @@id([map_id, location_id])
 }
