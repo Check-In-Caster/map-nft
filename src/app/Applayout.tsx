@@ -15,7 +15,7 @@ import { SessionProvider } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { Toaster } from "sonner";
 import { http, WagmiProvider } from "wagmi";
-import { base } from "wagmi/chains";
+import { baseSepolia } from "wagmi/chains";
 
 export const metadata: Metadata = {
   title: "Maps by Checkin",
@@ -29,9 +29,9 @@ const getSiweMessageOptions: GetSiweMessageOptions = () => ({
 const config = getDefaultConfig({
   appName: "Maps by Checkin",
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
-  chains: [base],
+  chains: [baseSepolia],
   transports: {
-    [base.id]: http(),
+    [baseSepolia.id]: http(),
   },
 });
 
@@ -53,7 +53,7 @@ const Applayout = ({
           <RainbowKitSiweNextAuthProvider
             getSiweMessageOptions={getSiweMessageOptions}
           >
-            <RainbowKitProvider initialChain={base.id}>
+            <RainbowKitProvider initialChain={baseSepolia.id}>
               <div className="bg-custom-gray-30 text-[#000] pb-8">
                 {pathName !== "/maintenance" ? (
                   <>

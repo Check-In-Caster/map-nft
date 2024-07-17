@@ -1,19 +1,27 @@
 "use client";
 
-import TrendingMaps from "@/components/home/trending-maps";
+import NFTCard from "@/components/home/nft-card";
 import Heading from "@/components/ui/heading";
 import ShareRefLink from "@/components/ui/share-link";
 import { shortenAddress } from "@/lib/utils";
+import { Maps, MapsCollected, MapsLiked } from "@prisma/client";
 import Image from "next/image";
-import { useState } from "react";
 import { useAccount } from "wagmi";
 
 const MyStats = ({
   profile,
-  mapToken,
+  stats,
+  checkInCount,
   walletAddress,
+  maps,
 }: {
   checkInCount?: number;
+
+  maps?: {
+    created: Maps[];
+    liked: { map: Maps & MapsCollected }[];
+    collected: { map: Maps & MapsLiked }[];
+  };
 
   profile?: {
     profileName: string;
@@ -21,38 +29,13 @@ const MyStats = ({
     profileImage: string;
     profileHandle: string;
   };
-  mapToken: string;
+  stats?: {
+    maps_created: string;
+    maps_collected: string;
+  };
   walletAddress: string;
 }) => {
   const wallet = useAccount();
-  const [active, setActive] = useState("Properties");
-
-  // useEffect(() => {
-  //   (async () => {
-  //     // where.collectionAddresses
-  //     const API_ENDPOINT = process.env.API_ENDPOINT;
-
-  //     const zdk = new ZDK({
-  //       endpoint: API_ENDPOINT,
-  //       networks: [
-  //         {
-  //           chain: ZDKChain.Mainnet,
-  //           network: ZDKNetwork.Ethereum,
-  //         },
-  //       ],
-  //       apiKey: "", // optional!
-  //     });
-
-  //     const response = await zdk.tokens({
-  //       where: {
-  //         collectionAddresses: ["0x224B2491F28F4a6Bde6b515b2371136FE38F5ba2"],
-  //         ownerAddresses: [walletAddress],
-  //       },
-  //     });
-
-  //     console.log(response);
-  //   })();
-  // }, []);
 
   return (
     <div className="mt-8 w-full max-w-7xl mx-auto mb-8">
@@ -78,15 +61,17 @@ const MyStats = ({
         <div className="flex flex-col md:flex-row space-x-5 items-center justify-between min-w-[500px] my-10 md:my-0">
           <div className="py-4 text-center bg-white p-2 w-2/3 my-3 md:my-0 md:min-w-40 h-24">
             <p className="text-lg font-medium">Maps Created</p>
-            <p className="text-3xl font-semibold mt-2">1</p>
+            <p className="text-3xl font-semibold mt-2">{stats?.maps_created}</p>
           </div>
           <div className="py-4 text-center bg-white p-2 w-2/3 my-3 md:my-0 md:min-w-40 h-24">
             <p className="text-lg font-medium">Maps Collected</p>
-            <p className="text-3xl font-semibold mt-2">2</p>
+            <p className="text-3xl font-semibold mt-2">
+              {stats?.maps_collected}
+            </p>
           </div>
           <div className="py-4 text-center bg-white p-2 w-2/3 my-3 md:my-0 md:min-w-40 h-24">
             <p className="text-lg font-medium">Checkins</p>
-            <p className="text-3xl font-semibold mt-2">3</p>
+            <p className="text-3xl font-semibold mt-2">{checkInCount}</p>
           </div>
         </div>
       </div>
@@ -99,13 +84,95 @@ const MyStats = ({
 
         <div className="mt-8 max-w-7xl mx-auto mb-8 p-2 md:p-0">
           <Heading label="Maps Created" />
-          <TrendingMaps />
+
+          {maps?.created.length === 0 && (
+            <div className="flex items-center justify-center mt-10">
+              <p className="text-xl font-semibold text-gray-500">
+                No Maps Created
+              </p>
+            </div>
+          )}
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
+            {maps?.created.map((map) => {
+              return (
+                <NFTCard
+                  key={map.map_id}
+                  property_id={map.map_id!}
+                  token_id={map.token_id ? Number(map.token_id) : undefined}
+                  title={map.name}
+                  slug={map.slug}
+                  imgUrl={map.thumbnail ?? undefined}
+                  emoji={map.map_emoji ?? undefined}
+                  creator={{
+                    wallet: map.wallet_address,
+                  }}
+                />
+              );
+            })}
+          </div>
 
           <Heading label="Maps Collected" />
-          <TrendingMaps />
+
+          {maps?.created.length === 0 && (
+            <div className="flex items-center justify-center mt-10">
+              <p className="text-xl font-semibold text-gray-500">
+                No Maps Collected
+              </p>
+            </div>
+          )}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
+            {maps?.collected.map((collected) => {
+              return (
+                <NFTCard
+                  key={collected.map.map_id}
+                  property_id={collected.map.map_id!}
+                  token_id={
+                    collected.map.token_id
+                      ? Number(collected.map.token_id)
+                      : undefined
+                  }
+                  title={collected.map.name}
+                  slug={collected.map.slug}
+                  imgUrl={collected.map.thumbnail ?? undefined}
+                  emoji={collected.map.map_emoji ?? undefined}
+                  creator={{
+                    wallet: collected.map.wallet_address,
+                  }}
+                />
+              );
+            })}
+          </div>
 
           <Heading label="Maps Liked" />
-          <TrendingMaps />
+
+          {maps?.liked.length === 0 && (
+            <div className="flex items-center justify-center mt-10">
+              <p className="text-xl font-semibold text-gray-500">
+                No Maps Liked
+              </p>
+            </div>
+          )}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
+            {maps?.liked.map((like) => {
+              return (
+                <NFTCard
+                  key={like.map.map_id}
+                  property_id={like.map.map_id!}
+                  token_id={
+                    like.map.token_id ? Number(like.map.token_id) : undefined
+                  }
+                  title={like.map.name}
+                  slug={like.map.slug}
+                  imgUrl={like.map.thumbnail ?? undefined}
+                  emoji={like.map.map_emoji ?? undefined}
+                  creator={{
+                    wallet: like.map.wallet_address,
+                  }}
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

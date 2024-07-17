@@ -1,18 +1,9 @@
-import { getMapsToken } from "@/components/home/actions";
-import FeatureBanner from "@/components/home/feature-banner";
 import HeroSection from "@/components/home/hero-section";
-import PropertyModal from "@/components/home/property-modal";
+import NFTCard from "@/components/home/nft-card";
 import TrendingMaps from "@/components/home/trending-maps";
-import TrumpProperties from "@/components/home/trump-properties";
 import Heading from "@/components/ui/heading";
-import { inter } from "@/fonts";
 import { prisma } from "@/lib/prisma";
-import { formatNumberWithCommas } from "@/lib/utils";
-import { Properties } from "@/types/property";
-import { Locations, PropertyInfo } from "@prisma/client";
 import { redirect } from "next/navigation";
-import Leaderboard from "./leaderboard/page";
-import TopPortfolios from "@/components/home/top-portfolios";
 
 const getData = async (propertyId: string, secret: string) => {
   const settings = await prisma.settings.findFirst({
@@ -36,22 +27,12 @@ const getData = async (propertyId: string, secret: string) => {
   //   },
   // });
 
-  // const trendingProperties = await prisma.propertyInfo.findMany({
-  //   where: {
-  //     Locations: {
-  //       country: {
-  //         not: "China",
-  //       },
-  //     },
-  //   },
-  //   orderBy: {
-  //     total_minted: "desc",
-  //   },
-  //   take: 4,
-  //   include: {
-  //     Locations: true,
-  //   },
-  // });
+  const trendingMaps = await prisma.maps.findMany({
+    orderBy: {
+      total_minted: "desc",
+    },
+    take: 4,
+  });
 
   // // [FIX] - cache these results.
   // const owners = await prisma.propertySales.groupBy({
@@ -80,8 +61,7 @@ const getData = async (propertyId: string, secret: string) => {
     // properties: (properties?._sum?.quantity ?? 0).toString(),
     // property: property,
     // defaultProperty: defaultProperty,
-    // trendingProperties: trendingProperties,
-    // trumpProperties: trumpProperties,
+    trendingMaps,
   };
 };
 
@@ -90,27 +70,47 @@ export default async function Home({
 }: {
   searchParams: Record<string, string>;
 }) {
-  // const { property, trendingProperties } = await getData(
-  //   searchParams.property,
-  //   searchParams.secret
-  // );
+  const { trendingMaps } = await getData(
+    searchParams.property,
+    searchParams.secret
+  );
 
   // await getData(searchParams.property, searchParams.secret);
 
+  console.log(trendingMaps);
+
   return (
     <>
-      {/* {searchParams.property && (
-        <PropertyModal
-          referral={searchParams.ref}
-          property={
-            property as PropertyInfo & { Locations: Partial<Locations> }
-          }
-        />
-      )} */}
       <HeroSection />
       <div className="mt-8 max-w-7xl mx-auto mb-8 p-2 md:p-0">
         <Heading label="Trending Maps" />
-        <TrendingMaps />
+
+        {trendingMaps?.length === 0 && (
+          <div className="flex items-center justify-center mt-10">
+            <p className="text-xl font-semibold text-gray-500">
+              No Trending Maps!
+            </p>
+          </div>
+        )}
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
+          {trendingMaps?.map((map) => {
+            return (
+              <NFTCard
+                key={map.map_id}
+                property_id={map.map_id!}
+                token_id={map.token_id ? Number(map.token_id) : undefined}
+                title={map.name}
+                slug={map.slug}
+                imgUrl={map.thumbnail ?? undefined}
+                emoji={map.map_emoji ?? undefined}
+                creator={{
+                  wallet: map.wallet_address,
+                }}
+              />
+            );
+          })}
+        </div>
 
         <Heading label="Tokyo Maps" />
         <TrendingMaps />

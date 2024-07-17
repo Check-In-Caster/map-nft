@@ -1,4 +1,3 @@
-import { getMapsToken } from "@/components/home/actions";
 import { getFarcasterAccount } from "@/lib/airstack";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
@@ -21,9 +20,55 @@ const getProperties = async (
     return redirect("/maintenance");
   }
 
+  const mapsCreatedCount = await prisma.maps.count({
+    where: { wallet_address: wallet_address },
+  });
+  const mapsCollectedCount = await prisma.mapsCollected.count({
+    where: { wallet_address: wallet_address },
+  });
+
+  let count = 0;
+
+  if (profileTokenId) {
+    count = await prisma.checkin.count({
+      where: {
+        fid: String(profileTokenId),
+      },
+    });
+  }
+
+  const mapsCreted = await prisma.mapsCollected.findMany({
+    where: { wallet_address: wallet_address },
+    take: 50,
+  });
+
+  const mapsCollected = await prisma.mapsCollected.findMany({
+    where: { wallet_address: wallet_address },
+    include: {
+      map: true,
+    },
+    take: 50,
+  });
+
+  const mapsLiked = await prisma.mapsLiked.findMany({
+    where: { wallet_address: wallet_address },
+    include: {
+      map: true,
+    },
+    take: 50,
+  });
+
   return {
-    checkInCount: 1,
-    stats: { propery_count: 1 },
+    checkInCount: count,
+    maps: {
+      collected: mapsCollected,
+      liked: mapsLiked,
+      created: mapsCreted,
+    },
+    stats: {
+      maps_created: mapsCreatedCount.toString(),
+      maps_collected: mapsCollectedCount.toString(),
+    },
   };
 };
 
@@ -40,20 +85,20 @@ const Page = async ({
 
   const profile =
     walletAddress != "" ? await getFarcasterAccount(walletAddress) : null;
-  const { checkInCount, stats } = await getProperties(
+  const { checkInCount, stats, maps } = await getProperties(
     walletAddress ?? "",
     profile?.profileTokenId ?? null,
     searchParams.secret
   );
 
-  const mapToken = await getMapsToken();
-
   return (
     <MyStats
       profile={profile}
       checkInCount={checkInCount}
-      mapToken={mapToken}
+      stats={stats}
       walletAddress={walletAddress}
+      // @ts-ignore
+      maps={maps}
     />
   );
 };

@@ -5,20 +5,12 @@ import {
   CHAIN_ID,
   CONTRACT_ADDRESS,
   EXPLORER_LINK,
-  NFT_PRICE,
   REF_WALLET_ADDRESS,
   RPC_PROVIDER,
   baseZoraMinterContractAddress,
-  getRarityColor,
 } from "@/config";
 import { baseZoraTokenABI } from "@/constants/zora";
-import { useEthersSigner } from "@/hooks/useSigner";
-import OpenLocationCode from "@/lib/openlocationcode";
-import {
-  formatNumberWithCommas,
-  isValidEthAddress,
-  shortenAddress,
-} from "@/lib/utils";
+import { isValidEthAddress, shortenAddress } from "@/lib/utils";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import confetti from "canvas-confetti";
 import { ethers } from "ethers";
@@ -29,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { toast } from "sonner";
-import { useAccount, useWalletClient, useWriteContract } from "wagmi";
+import { useAccount, useWriteContract } from "wagmi";
 import CostBreakdown from "../ui/cost-breakdown";
 import Heading from "../ui/heading";
 import Quantity from "../ui/quanitity";
@@ -255,13 +247,10 @@ const NFTCard = ({
 }) => {
   const account = useAccount();
   const router = useRouter();
-  const { data: walletClient, isLoading, isError } = useWalletClient();
 
   const { writeContractAsync } = useWriteContract();
 
   const [count, setCount] = useState(1);
-  const signer = useEthersSigner({ chainId: CHAIN_ID });
-  const [crypto, setCrypto] = useState("$DEGEN");
   const [hash, setHash] = useState<null | string>(null);
   const [minted, setMinted] = useState(false);
   const [mintedLoading, setMintLoading] = useState(false);

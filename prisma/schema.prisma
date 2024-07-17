@@ -201,6 +201,7 @@ model PropertySales {
   updated_at     DateTime?     @default(now()) @db.Timestamp(6)
   tx_hash        String?
   quantity       Int?          @default(1) @db.SmallInt
+  category       String?       @db.VarChar(255)
   PropertyInfo   PropertyInfo? @relation(fields: [property_id], references: [property_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
@@ -254,7 +255,8 @@ model Maps {
   thumbnail      String?
   wallet_address String
   map_emoji      String?
-  token_id       String?
+  token_id       String
+  total_minted   Decimal?        @default(0) @db.Decimal
   MapsCollected  MapsCollected[]
   MapsLiked      MapsLiked[]
   MapsPlaces     MapsPlaces[]
@@ -271,7 +273,7 @@ model MapsPlaces {
 
 model MapsLiked {
   map_id         String @db.Uuid
-  wallet_address String @db.Uuid
+  wallet_address String
   map            Maps   @relation(fields: [map_id], references: [map_id])
 
   @@id([map_id, wallet_address])
@@ -280,7 +282,7 @@ model MapsLiked {
 model MapsCollected {
   collected_id   String   @id @default(uuid()) @db.Uuid
   map_id         String   @db.Uuid
-  wallet_address String   @db.Uuid
+  wallet_address String
   token_id       String
   quantity       Int
   tx_hash        String

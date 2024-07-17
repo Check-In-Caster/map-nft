@@ -48,6 +48,7 @@ body {
 }
 
 .connect-wallet button div {
+  color: #fff !important;
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
