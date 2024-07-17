@@ -23,7 +23,7 @@ const Footer = () => {
 
         <div className="absolute inset-0">
           <Image
-            src="/assets/images/header.png"
+            src="/assets/images/footer.png"
             alt=""
             fill
             className="object-left-bottom object-cover"

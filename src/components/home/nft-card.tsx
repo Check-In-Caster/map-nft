@@ -14,12 +14,17 @@ import {
 import { baseZoraTokenABI } from "@/constants/zora";
 import { useEthersSigner } from "@/hooks/useSigner";
 import OpenLocationCode from "@/lib/openlocationcode";
-import { formatNumberWithCommas, isValidEthAddress } from "@/lib/utils";
+import {
+  formatNumberWithCommas,
+  isValidEthAddress,
+  shortenAddress,
+} from "@/lib/utils";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import confetti from "canvas-confetti";
 import { ethers } from "ethers";
-import { Link, Share } from "lucide-react";
+import { Link as LinkIcon, Share } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
@@ -35,36 +40,28 @@ function capitalizeFirstLetter(string: string) {
 
 const MintTransaction = ({
   title,
-  location,
-  score,
-  rating,
-  ratingCount,
   imgUrl,
+  emoji,
+  creator,
   hash,
   className,
-  flipBackDetails,
   shareText,
   shareUrl,
 }: {
   title: string;
-  location: string;
-  score?: number;
-  rating: number | null;
-  ratingCount: number | null;
-  imgUrl: string;
+  imgUrl?: string;
+  emoji?: string;
+  creator: {
+    wallet: string;
+    farcaster?: {
+      name: string;
+      imgUrl: string;
+    };
+  };
   hash?: string;
   shareText: string;
   shareUrl: string;
   className?: string;
-  flipBackDetails: {
-    country: string;
-    type: string;
-    address: string;
-    code: string;
-    coordinates: string;
-    id: string;
-    edition: string;
-  };
 }) => {
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -143,7 +140,7 @@ const MintTransaction = ({
                   text={`${shareUrl}`}
                 >
                   <a className="w-14 cursor-pointer h-14 flex justify-center items-center bg-gray-200 rounded-full">
-                    <Link className="h-5 w-5" strokeWidth={3} />
+                    <LinkIcon className="h-5 w-5" strokeWidth={3} />
                   </a>
                 </CopyToClipboard>
                 <a
@@ -187,13 +184,9 @@ const MintTransaction = ({
           <Card
             className={className}
             title={title}
-            location={location}
-            score={score}
-            rating={rating}
-            ratingCount={ratingCount}
             imgUrl={imgUrl}
-            flipped={true}
-            flipBackDetails={flipBackDetails}
+            emoji={emoji}
+            creator={creator}
           />
         </div>
         <p className="text-xs mt-3 block text-gray-500">
@@ -225,68 +218,45 @@ const NFTCard = ({
   property_id,
   referral = "",
   token_id,
+  slug,
   className,
   buttonClassName,
   title,
-  location,
-  score,
   hide_mint_btn = false,
   userMinted = 0,
-  rating,
-  ratingCount,
-  buttonText,
   imgUrl,
-  flipBackDetails,
-  type,
+  emoji,
+  creator,
   hideCard = false,
   defaultOpen = false,
   disableOutsideInteraction = false,
-  isExcluded = false,
 }: {
   property_id?: string;
   referral?: string;
   token_id?: number | undefined;
+  slug: string;
   className?: string;
   buttonClassName?: string;
   hide_mint_btn?: boolean;
   title: string;
-  location: string;
-  score?: number;
   userMinted?: number;
-  rating: number | null;
-  ratingCount: number | null;
-  buttonText: string;
-  imgUrl: string;
-  flipBackDetails: {
-    country: string;
-    type: string;
-    address: string;
-    code: string;
-    coordinates: string;
-    id: string;
-    edition: string;
+  imgUrl?: string;
+  emoji?: string;
+  creator: {
+    wallet: string;
+    farcaster?: {
+      name: string;
+      imgUrl: string;
+    };
   };
   hideCard?: boolean;
   defaultOpen?: boolean;
   disableOutsideInteraction?: boolean;
-  type?: string;
-  isExcluded?: boolean;
 }) => {
   const account = useAccount();
   const router = useRouter();
   const { data: walletClient, isLoading, isError } = useWalletClient();
 
-  if (
-    !(
-      type === "country" ||
-      type === "state" ||
-      type === "town" ||
-      type === "city"
-    )
-  )
-    type = undefined;
-  const price = type ? NFT_PRICE[type] : 0;
-  type ? (flipBackDetails.type = capitalizeFirstLetter(type)) : null;
   const { writeContractAsync } = useWriteContract();
 
   const [count, setCount] = useState(1);
@@ -295,46 +265,8 @@ const NFTCard = ({
   const [hash, setHash] = useState<null | string>(null);
   const [minted, setMinted] = useState(false);
   const [mintedLoading, setMintLoading] = useState(false);
-  const [placeCode, setPlaceCode] = useState<string>();
 
-  useEffect(() => {
-    const openLocationCode = new OpenLocationCode();
-
-    try {
-      const coordinatesArr = flipBackDetails.coordinates
-        .replace("{", "")
-        .replace("}", "")
-        .trim()
-        .split(",")
-        .map((c) => parseFloat(c));
-      const coordinates = {
-        lat: coordinatesArr[0],
-        lng: coordinatesArr[1],
-      };
-
-      const longPlusCode = openLocationCode.encode(
-        coordinates.lat,
-        coordinates.lng,
-        10
-      );
-      const shortPlusCode = openLocationCode.shorten(
-        longPlusCode,
-        coordinates.lat.toFixed(1),
-        coordinates.lng.toFixed(1)
-      );
-      setPlaceCode(shortPlusCode);
-    } catch {}
-  }, [flipBackDetails.coordinates]);
-
-  placeCode ? (flipBackDetails.code = placeCode) : null;
-
-  // score based on type
-  if (type) {
-    if (type === "country") score = 1000000;
-    if (type === "state") score = 100000;
-    if (type === "city") score = 40000;
-    if (type === "town") score = 20000;
-  }
+  const price = 0;
 
   const mint = async () => {
     let tokenId = token_id;
@@ -351,7 +283,7 @@ const NFTCard = ({
     setMintLoading(true);
 
     if (!token_id) {
-      tokenId = await deployToken(property_id!, type);
+      tokenId = await deployToken(property_id!, "type");
 
       if (tokenId) {
         await new Promise<void>((resolveMain) =>
@@ -486,12 +418,9 @@ const NFTCard = ({
                 <Card
                   className={className}
                   title={title}
-                  location={location}
-                  score={score}
-                  rating={rating}
-                  ratingCount={ratingCount}
                   imgUrl={imgUrl}
-                  flipBackDetails={flipBackDetails}
+                  emoji={emoji}
+                  creator={creator}
                 />
                 <CopyToClipboard
                   text={shareUrl}
@@ -535,7 +464,7 @@ const NFTCard = ({
                   {(account.addresses ?? [])?.length > 0 ? (
                     <>
                       <button
-                        className="bg-[#EF9854] text-[#000] border border-gray-900 py-2 px-5 w-full"
+                        className="bg-[#5844C1] text-[#000] border border-gray-900 py-2 px-5 w-full"
                         onClick={mint}
                         disabled={mintedLoading}
                       >
@@ -545,7 +474,7 @@ const NFTCard = ({
                   ) : (
                     <div
                       style={{ zIndex: 100 }}
-                      className="connect-wallet cursor-pointer z-[100] bg-[#EF9854] text-[#000] border border-gray-900 py-2 px-5 w-full"
+                      className="connect-wallet cursor-pointer z-[100] bg-[#5844C1] text-[#000] border border-gray-900 py-2 px-5 w-full"
                       onClick={(e) => {
                         const el = e.target as HTMLElement;
                         el.querySelector("button")?.click();
@@ -555,23 +484,17 @@ const NFTCard = ({
                     </div>
                   )}
                 </div>
-                <p className="text-lg text-neutral-500 text-center mt-5 font-semibold">
-                  {flipBackDetails.edition}
-                </p>
               </div>
             </div>
           )}
           {minted && (
             <MintTransaction
               title={title}
-              location={location}
-              score={score}
-              rating={rating}
-              ratingCount={ratingCount}
               imgUrl={imgUrl}
+              emoji={emoji}
+              creator={creator}
               hash={hash ?? ""}
               className={className}
-              flipBackDetails={flipBackDetails}
               shareText={shareText}
               shareUrl={shareUrl}
             />
@@ -586,36 +509,33 @@ const NFTCard = ({
                     className={className}
                     minted={userMinted}
                     title={title}
-                    location={location}
-                    score={score}
-                    rating={rating}
-                    ratingCount={ratingCount}
                     imgUrl={imgUrl}
-                    flipBackDetails={flipBackDetails}
+                    emoji={emoji}
+                    creator={creator}
                   />
                 </div>
               </DialogTrigger>
 
               {hide_mint_btn ? null : (
-                <DialogTrigger asChild>
-                  <button
-                    className={`border border-gray-900 py-2 mt-5 w-full disabled:opacity-50 ${
-                      buttonClassName
-                        ? buttonClassName
-                        : "bg-[#EF9854] text-[#000]"
-                    }`}
-                    disabled={isExcluded}
-                    title={
-                      isExcluded
-                        ? "This property is excluded from minting"
-                        : undefined
-                    }
+                <div className="flex gap-2 px-1">
+                  <Link
+                    href={`/maps/${slug}`}
+                    className={`border text-center border-[#5844C1] py-2 mt-5 w-full disabled:opacity-50 bg-[#fff] text-[#5844C1]`}
                   >
-                    {!isExcluded
-                      ? buttonText
-                      : "Cannot mint this category - sorry!"}
-                  </button>
-                </DialogTrigger>
+                    View
+                  </Link>
+                  <DialogTrigger asChild>
+                    <button
+                      className={`border text-center border-[#5844C1] py-2 mt-5 w-full disabled:opacity-50 ${
+                        buttonClassName
+                          ? buttonClassName
+                          : "bg-[#5844C1] text-[#fff]"
+                      }`}
+                    >
+                      Mint
+                    </button>
+                  </DialogTrigger>
+                </div>
               )}
             </div>
           </>
@@ -628,128 +548,59 @@ const NFTCard = ({
 const Card = ({
   className,
   title,
-  location,
-  score,
   minted = 0,
-  rating,
-  ratingCount,
   imgUrl,
-  flipped = false,
-  flipBackDetails,
+  emoji,
+  creator,
 }: {
   className?: string;
-  buttonClassName?: string;
   title: string;
-  location: string;
-  score?: number;
   minted?: number;
-  rating: number | null;
-  ratingCount: number | null;
-  imgUrl: string;
-  flipped?: boolean;
-  flipBackDetails: {
-    country: string;
-    type: string;
-    address: string;
-    code: string;
-    coordinates: string;
-    id: string;
-    edition: string;
+  imgUrl?: string;
+  emoji?: string;
+  creator: {
+    wallet: string;
+    farcaster?: {
+      name: string;
+      imgUrl: string;
+    };
   };
 }) => {
   return (
-    <div
-      className={`border border-gray-900 h-full flex flex-col relative p-4 ${className}`}
-      style={{
-        background:
-          score || score === 0
-            ? getRarityColor(Number(score ?? 0))
-            : "linear-gradient(270deg, #EF9854 0%, #C8B6E8 33%, #BAE1EB 66%, #D9E8B6 100%)",
-      }}
-    >
-      {!score && score !== 0 && (
-        <div className="absolute inset-0 pointer-events-none text-2xl">
-          <div className="absolute left-0.5 top-0 rotate-[-25deg]">?</div>
-          <div className="absolute right-0.5 top-0 rotate-[25deg]">?</div>
-          <div className="absolute left-0.5 bottom-0 rotate-[-155deg]">?</div>
-          <div className="absolute right-0.5 bottom-0 rotate-[155deg]">?</div>
-        </div>
-      )}
-      {!flipped && (
-        <div className="flip-container w-full h-[246px]">
-          <div className="flip-inner w-full h-full">
-            <div className="flip-front w-full h-full relative">
-              {minted >= 1 ? (
-                <div className="bg-white w-fit absolute right-2 top-2 px-2 py-1">
-                  x {minted}
-                </div>
-              ) : null}
-              <img
-                src={imgUrl}
-                alt=""
-                className="w-full h-full object-cover border border-gray-900"
-              />
-            </div>
-            <div className="flip-back text-sm p-3 relative w-full h-full">
-              <p>{flipBackDetails.country}</p>
-              <p>{flipBackDetails.type}</p>
-              <p>{flipBackDetails.address}</p>
-              <p>{flipBackDetails.code}</p>
-              <p>{flipBackDetails.coordinates}</p>
-              <p>{flipBackDetails.id}</p>
-              <p className="absolute right-2 bottom-2">
-                {flipBackDetails.edition}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {flipped && (
-        <div className="bg-black text-white w-full h-[246px]">
-          <div className="w-full h-full">
-            <div className="text-sm p-3 relative w-full h-full">
-              <p>{flipBackDetails.country}</p>
-              <p>{flipBackDetails.type}</p>
-              <p>{flipBackDetails.address}</p>
-              <p>{flipBackDetails.code}</p>
-              <p>{flipBackDetails.coordinates}</p>
-              <p>{flipBackDetails.id}</p>
-              <p className="absolute right-2 bottom-2">
-                {flipBackDetails.edition}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <h3 className="font-medium text-xl mt-5">{title}</h3>
-      <p className="font-medium my-2 text-sm">{location}</p>
-      <p className="flex-1"></p>
-      <p className="flex items-center space-x-2">
-        {rating != null ? (
-          <>
-            {Array(Math.ceil(rating))
-              .fill(0)
-              .map((_, index) => (
-                <img
-                  key={index}
-                  src="/assets/icons/star.svg"
-                  className="w-5 h-5 inline-block"
-                />
-              ))}
-          </>
-        ) : null}
-        {rating ? (
-          <span className="ml-1">
-            {ratingCount !== null ? (
-              <>({formatNumberWithCommas(ratingCount.toString())})</>
-            ) : null}
-          </span>
+    <div className={`h-full flex flex-col relative p-2 ${className}`}>
+      <div className="w-full">
+        {imgUrl ? (
+          <Image
+            src={imgUrl}
+            alt={title}
+            height={320}
+            width={320}
+            className="w-80 object-cover aspect-square"
+          />
         ) : (
-          <br />
+          <div className="bg-white w-full aspect-square text-center flex flex-col justify-center">
+            <div className="text-center relative text-lg">
+              <div className="absolute text-6xl -top-16 left-1/2 -translate-x-1/2">
+                {emoji}
+              </div>
+              <div className="text-3xl">{title}</div>
+            </div>
+          </div>
         )}
-      </p>
+      </div>
+      <div className="text-xl line-clamp-2 mt-3">{title}</div>
+      <div className="flex gap-2 items-center mt-2">
+        <Image
+          src={creator.farcaster?.imgUrl ?? "https://i.imgur.com/yZOyUGG.png"}
+          alt={creator.farcaster?.name ?? ""}
+          height={28}
+          width={28}
+          className="rounded-full h-7 w-7 object-cover"
+        />
+        <span className="text-sm">
+          {creator.farcaster?.name ?? shortenAddress(creator.wallet)}
+        </span>
+      </div>
     </div>
   );
 };
