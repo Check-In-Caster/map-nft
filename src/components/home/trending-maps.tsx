@@ -50,11 +50,6 @@ const maps = [
     slug: "top-10-ramen-in-tokyo",
     creator: {
       wallet: "0x13F37fE246C8a927B339E6c095AFbda275709100",
-      farcaster: {
-        name: "yuki",
-        imgUrl:
-          "https://imagedelivery.net/BXluQx4ige9GuW0Ia56BHw/ba776434-7fd2-4038-34be-f17e94546300/original",
-      },
     },
     map_emoji: "🍜",
   },
