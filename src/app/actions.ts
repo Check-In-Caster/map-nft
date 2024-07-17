@@ -2,7 +2,6 @@
 
 import { NFT_PRICE } from "@/config";
 import { createNewToken } from "@/lib/deployToken";
-import { getPropertyScore } from "@/lib/helpers";
 import { prisma } from "@/lib/prisma";
 import "@ethersproject/shims";
 
@@ -23,9 +22,9 @@ export default async function updateMintRecords({
     return null;
   }
 
-  const tokenAlreadyExist = await prisma.propertySales.findFirst({
+  const tokenAlreadyExist = await prisma.mapsCollected.findFirst({
     select: {
-      property_id: true,
+      collected_id: true,
     },
     where: {
       tx_hash: tx_hash,
@@ -36,19 +35,19 @@ export default async function updateMintRecords({
     return null;
   }
 
-  await prisma.propertySales.create({
+  await prisma.mapsCollected.create({
     data: {
       wallet_address: wallet_address.toLocaleLowerCase(),
-      property_id: property_id,
+      map_id: property_id,
       token_id: token_id,
       tx_hash: tx_hash,
       quantity: count,
     },
   });
 
-  await prisma.propertyInfo.update({
+  await prisma.maps.update({
     where: {
-      property_id: property_id,
+      map_id: property_id,
     },
     data: {
       total_minted: {
@@ -61,42 +60,24 @@ export default async function updateMintRecords({
 }
 
 export async function deployToken(property_id: string, type?: string) {
-  const propertyInfo = await prisma.propertyInfo.findFirst({
+  const propertyInfo = await prisma.maps.findFirst({
     where: {
-      property_id: property_id,
-    },
-    include: {
-      Locations: true,
+      map_id: property_id,
     },
   });
 
   if (propertyInfo?.token_id) {
-    return propertyInfo.token_id;
+    return Number(propertyInfo.token_id);
   }
 
-  if (
-    !(
-      type === "country" ||
-      type === "state" ||
-      type === "town" ||
-      type === "city"
-    )
-  )
-    type = undefined;
+  type = "city";
 
   const tokenId = await createNewToken({
     maxSupply: 1000,
     mintLimit: 100,
-    price: type ? NFT_PRICE[type] : 0,
+    price: type ? NFT_PRICE.town : 0,
     tokenURI: "https://property.checkin.gg/api/metadata/",
   });
-
-  const score = propertyInfo?.Locations?.place_id
-    ? await getPropertyScore(
-        propertyInfo?.Locations?.place_id,
-        type ?? "property"
-      )
-    : 0;
 
   if (tokenId) {
     const propertyInfo = await prisma.propertyInfo.update({
@@ -105,7 +86,6 @@ export async function deployToken(property_id: string, type?: string) {
       },
       data: {
         token_id: Number(tokenId),
-        score: score,
       },
     });
 
