@@ -1,7 +1,9 @@
 "use client";
 
 import AppleMap from "@/components/home/map";
+import Search from "@/components/home/search";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   FormControl,
   FormField,
@@ -18,12 +20,10 @@ import { Textarea } from "@/components/ui/textarea";
 import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { PlusIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { createMap, getLocationInfo, updateMap } from "../actions";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import Search from "@/components/home/search";
-import { useEffect, useState } from "react";
 
 const PlaceCard = ({
   property_id,
@@ -147,12 +147,16 @@ const MapForm = ({
           places: places,
         });
 
-    toast.success(
-      map_id ? "Map updated successfully" : " Map created successfully"
-    );
+    if (response.status == "error") {
+      toast.error(response.message);
+    } else {
+      toast.success(
+        map_id ? "Map updated successfully" : " Map created successfully"
+      );
 
-    // redirect to the map page
-    router.push(`/maps/${response.slug}`);
+      // redirect to the map page
+      router.push(`/maps/${response.slug}`);
+    }
   };
 
   const emojiValue = form.watch("emoji");

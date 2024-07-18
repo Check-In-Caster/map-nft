@@ -45,7 +45,7 @@ const Page = async ({
         description: map.description!,
         emoji: map.map_emoji!,
         places: map.MapsPlaces.map((place) => ({
-          location_id: place.location_id!,
+          property_id: place.property_id!,
           description: place.description!,
         })),
       }}

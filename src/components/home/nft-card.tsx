@@ -570,7 +570,7 @@ const Card = ({
           <div className="bg-white w-full aspect-square text-center flex flex-col justify-center">
             <div className="text-center relative text-lg">
               <div className="absolute text-6xl -top-16 left-1/2 -translate-x-1/2">
-                {emoji}
+                <img src={emoji} alt="" />
               </div>
               <div className="text-3xl">{title}</div>
             </div>

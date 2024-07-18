@@ -266,8 +266,8 @@ model Maps {
 
 model MapsPlaces {
   map_id      String  @db.Uuid
-  property_id String  @db.Uuid
   description String?
+  property_id String  @db.Uuid
   map         Maps    @relation(fields: [map_id], references: [map_id])
 
   @@id([map_id, property_id])

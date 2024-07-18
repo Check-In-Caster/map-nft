@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
 
 function generateSlug(name: string) {
   const slug = name
@@ -28,7 +29,16 @@ export async function createMap({
     description: string;
   }[];
 }) {
-  // [BUG] - Add owner wallet address
+  const session = await getServerSession();
+
+  const wallet_address = session?.user?.name?.toLocaleLowerCase() ?? "";
+
+  if (!wallet_address) {
+    return {
+      status: "error",
+      message: "Please connect wallet to continue",
+    };
+  }
 
   const map = await prisma.maps.create({
     data: {
@@ -37,7 +47,7 @@ export async function createMap({
       slug: generateSlug(name),
       thumbnail: "",
       token_id: "",
-      wallet_address: "",
+      wallet_address: wallet_address,
       map_emoji: emoji,
       MapsPlaces: {
         createMany: {
@@ -73,8 +83,31 @@ export async function updateMap({
     description: string;
   }[];
 }) {
-  // [BUG] - Check wallet address before updating
+  const session = await getServerSession();
+
+  const wallet_address = session?.user?.name?.toLocaleLowerCase() ?? "";
+
+  if (!wallet_address) {
+    return {
+      status: "error",
+      message: "Please connect wallet to continue",
+    };
+  }
+
   try {
+    const mapDetails = await prisma.maps.findFirst({
+      where: {
+        map_id,
+      },
+    });
+
+    if (mapDetails?.wallet_address !== wallet_address) {
+      return {
+        status: "error",
+        message: "You are not authorized to update this map",
+      };
+    }
+
     const map = await prisma.maps.update({
       where: {
         map_id,
@@ -83,7 +116,6 @@ export async function updateMap({
         name,
         description,
         map_emoji: emoji,
-        // slug: generateSlug(name),
       },
     });
 
