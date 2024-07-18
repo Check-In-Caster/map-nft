@@ -20,47 +20,71 @@ import { PlusIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { createMap, updateMap } from "../actions";
+import { createMap, getLocationInfo, updateMap } from "../actions";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import Search from "@/components/home/search";
+import { useEffect, useState } from "react";
 
 const PlaceCard = ({
-  name,
-  image,
-  rating,
-  reviews,
-  category,
+  property_id,
   placeDescription,
   removePlace,
 }: {
-  name: string;
-  image: string;
-  rating: number;
-  reviews: number;
-  category: string;
+  property_id: string;
   placeDescription: React.ReactNode;
   removePlace?: React.ReactNode;
 }) => {
+  const [location, setLocation] = useState<{
+    name: string;
+    image: string;
+    rating: number;
+    category: string;
+  } | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const location = await getLocationInfo(property_id);
+
+      if (location)
+        setLocation({
+          name: location.location ?? "",
+          image: location.image ?? "",
+          rating: location.rating ?? 0,
+          category: location.category ?? "",
+        });
+    })();
+  }, [property_id]);
+
   return (
     <>
       <div className="flex mt-4">
         <div>
-          <img src={image} alt="place" className="rounded" />
+          <img
+            src={location?.image ?? "https://via.placeholder.com/96"}
+            alt="place"
+            className="rounded w-24 aspect-square object-cover"
+          />
         </div>
         <div className="w-full pl-6 relative">
-          <div className="text-xl">{name}</div>
-          <div className="flex items-center font-normal">
-            {rating}
-            <img
-              src="/assets/icons/ratings.svg"
-              alt=""
-              className="inline pr-4 pl-1"
-            />
-            ({reviews})
-          </div>
-          <div className="font-light">{category}</div>
+          {location ? (
+            <>
+              <div className="text-xl">{location.name}</div>
+              <div className="flex items-center font-normal">
+                {location.rating}
+                <img
+                  src="/assets/icons/ratings.svg"
+                  alt=""
+                  className="inline pr-4 pl-1"
+                />
+              </div>
+              <div className="font-light">{location.category}</div>
+            </>
+          ) : null}
 
           <div className="absolute right-0 top-0">{removePlace}</div>
         </div>
       </div>
+
       {placeDescription}
     </>
   );
@@ -87,12 +111,14 @@ const MapForm = ({
     description: string;
     emoji: string;
     places: {
-      location_id: string;
+      property_id: string;
       description: string;
     }[];
   };
 }) => {
   const router = useRouter();
+
+  const [openModal, setOpenModal] = useState(false);
 
   const form = useForm({
     defaultValues: values,
@@ -126,7 +152,7 @@ const MapForm = ({
     );
 
     // redirect to the map page
-    router.push(`/map/${response.map_id}`);
+    router.push(`/maps/${response.slug}`);
   };
 
   const emojiValue = form.watch("emoji");
@@ -190,12 +216,8 @@ const MapForm = ({
               <div>
                 {fields.map((item, index) => (
                   <PlaceCard
-                    name="Ramen Nagi"
                     key={item.id}
-                    image="https://via.placeholder.com/80"
-                    rating={4.6}
-                    reviews={442}
-                    category="Ramen Restaurants"
+                    property_id={item.property_id}
                     removePlace={
                       <button type="button" onClick={() => remove(index)}>
                         <X size={24} />{" "}
@@ -222,11 +244,12 @@ const MapForm = ({
                     }
                   />
                 ))}
+
                 <a
+                  className="mt-8 flex items-center cursor-pointer"
                   onClick={() => {
-                    append({ description: "", location_id: "" });
+                    setOpenModal(true);
                   }}
-                  className="mt-8 flex items-center"
                 >
                   <PlusIcon size={24} className="mr-2" />
                   Add a Place
@@ -258,6 +281,34 @@ const MapForm = ({
           />
         </div>
       </div>
+
+      <Dialog
+        open={openModal}
+        onOpenChange={(open) => {
+          if (!open) {
+            setOpenModal(false);
+          }
+        }}
+      >
+        <DialogContent className="h-96 max-w-[800px] w-full">
+          <div>
+            <div className="bg-white">
+              <Search
+                setProperty={(property) => {
+                  append({
+                    description: "",
+                    property_id: property.property_id,
+                  });
+                  setOpenModal(false);
+                }}
+              />
+            </div>
+            <div className="text-center h-full flex items-center justify-center pb-20">
+              Search to get a list of locations
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

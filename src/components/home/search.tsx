@@ -7,8 +7,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getPlaceDetails } from "./actions";
 
 const Search: React.FC<{
-  setLocation: (location: Properties[number] & { excluded: boolean }) => void;
-}> = ({ setLocation }) => {
+  setProperty: (location: Properties[number] & { excluded: boolean }) => void;
+}> = ({ setProperty }) => {
   const [inputValue, setInputValue] = useState("");
   const debouncedInputValue = useDebounce(inputValue, 500);
   const [predictionResults, setPredictionResults] = useState<
@@ -62,12 +62,12 @@ const Search: React.FC<{
       const details = await getPlaceDetails(placeId);
 
       if (details) {
-        setLocation(details as Properties[number] & { excluded: boolean });
+        setProperty(details as Properties[number] & { excluded: boolean });
 
         setInputValue("");
       }
     },
-    [setLocation]
+    [setProperty]
   );
 
   // detect clicks outside and inside group ref and close results accordingly
@@ -108,7 +108,7 @@ const Search: React.FC<{
           <SearchIcon />
           <input
             type="text"
-            placeholder="Search onchain property"
+            placeholder="Search location"
             className="ml-2 w-full placeholder:text-[#060707] outline-none"
             value={inputValue}
             onChange={onInputChange}
@@ -131,11 +131,6 @@ const Search: React.FC<{
               ))}
           </div>
         </div>
-        <button
-          className={`border bg-[#D9E9B4] border-gray-900 py-1 px-5 disabled:opacity-50`}
-        >
-          Search
-        </button>
       </div>
     </div>
   );

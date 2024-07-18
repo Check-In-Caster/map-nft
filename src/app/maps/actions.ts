@@ -24,7 +24,7 @@ export async function createMap({
   description: string;
   emoji: string;
   places: {
-    location_id: string;
+    property_id: string;
     description: string;
   }[];
 }) {
@@ -41,8 +41,8 @@ export async function createMap({
       map_emoji: emoji,
       MapsPlaces: {
         createMany: {
-          data: places.map(({ location_id, description }) => ({
-            location_id,
+          data: places.map(({ property_id, description }) => ({
+            property_id,
             description,
           })),
         },
@@ -53,7 +53,7 @@ export async function createMap({
   return {
     status: "success",
     message: "Map created successfully",
-    map_id: map.map_id,
+    slug: map.slug,
   };
 }
 
@@ -69,7 +69,7 @@ export async function updateMap({
   description: string;
   emoji: string;
   places: {
-    location_id: string;
+    property_id: string;
     description: string;
   }[];
 }) {
@@ -94,9 +94,9 @@ export async function updateMap({
     });
 
     await prisma.mapsPlaces.createMany({
-      data: places.map(({ location_id, description }) => ({
+      data: places.map(({ property_id, description }) => ({
         map_id,
-        location_id,
+        property_id,
         description,
       })),
     });
@@ -104,7 +104,7 @@ export async function updateMap({
     return {
       status: "success",
       message: "Map updated successfully",
-      map_id: map.map_id,
+      slug: map.slug,
     };
   } catch (error) {
     console.error("Failed to update map:", error);
@@ -113,4 +113,18 @@ export async function updateMap({
       message: "Failed to update map",
     };
   }
+}
+
+export async function getLocationInfo(property_id: string) {
+  console.log("property_id", property_id);
+  const property = await prisma.propertyInfo.findFirst({
+    where: {
+      property_id,
+    },
+    include: {
+      Locations: true,
+    },
+  });
+
+  return property?.Locations;
 }
