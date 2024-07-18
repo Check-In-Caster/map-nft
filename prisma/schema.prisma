@@ -257,6 +257,8 @@ model Maps {
   map_emoji      String?
   token_id       String
   total_minted   Decimal?        @default(0) @db.Decimal
+  token_gated    Boolean?        @default(false)
+  eth_amount     String?
   MapsCollected  MapsCollected[]
   MapsLiked      MapsLiked[]
   MapsPlaces     MapsPlaces[]
