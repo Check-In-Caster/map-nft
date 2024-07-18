@@ -4,6 +4,7 @@ import { Lexend } from "next/font/google";
 import { shortenAddress } from "@/lib/utils";
 import { getMapsToken } from "@/components/home/actions";
 import AppleMap from "@/components/home/map";
+import { prisma } from "@/lib/prisma";
 
 const lexend = Lexend({
   subsets: ["latin"],
@@ -30,14 +31,12 @@ const PlaceCard = ({
   name,
   image,
   rating,
-  reviews,
   category,
   placeDescription,
 }: {
   name: string;
   image: string;
   rating: number;
-  reviews: number;
   category: string;
   placeDescription: React.ReactNode;
 }) => {
@@ -56,7 +55,6 @@ const PlaceCard = ({
               alt=""
               className="inline pr-4 pl-1"
             />
-            ({reviews})
           </div>
           <div className="font-light">{category}</div>
           <div className="font-thin">{placeDescription}</div>
@@ -78,17 +76,49 @@ const MapDetailsPage = async ({
   };
   searchParams: Record<string, string>;
 }) => {
+  const { slug } = params;
   const mapToken = await getMapsToken();
+
+  const map = await prisma.maps.findFirst({
+    where: {
+      slug,
+    },
+    include: {
+      MapsPlaces: true,
+    },
+  });
+
+  const mapPlaces = await prisma.propertyInfo.findMany({
+    where: {
+      property_id: {
+        in: map?.MapsPlaces.map((place) => place.property_id),
+      },
+    },
+    include: {
+      Locations: true,
+    },
+  });
+
+  const mapCoordinates = mapPlaces.map((place) => {
+    const coordinates = place.Locations?.coordinates as {
+      lat: number;
+      lng: number;
+    };
+    return {
+      lat: coordinates.lat ?? 0,
+      lng: coordinates.lng ?? 0,
+    };
+  });
 
   return (
     <div className="mt-8 max-w-7xl mx-auto mb-8 p-2 md:p-0">
       <section className="flex justify-between">
         <div>
-          <h1 className="text-4xl">{mapData.name}</h1>
+          <h1 className="text-4xl">{map?.name}</h1>
           <h2
             className={`text-xl mt-2 ${lexend.className} font-light tracking-normal`}
           >
-            {mapData.description}
+            {map?.description}
           </h2>
 
           <div className="flex gap-2 items-center mt-3">
@@ -104,7 +134,7 @@ const MapDetailsPage = async ({
             />
             <span className="text-sm">
               {mapData.creator.farcaster?.name ??
-                shortenAddress(mapData.creator.wallet)}
+                shortenAddress(map?.wallet_address ?? "")}
             </span>
           </div>
 
@@ -124,46 +154,22 @@ const MapDetailsPage = async ({
 
       <section className="mt-8 flex gap-x-2">
         <div className="flex-1 flex flex-col gap-y-5">
-          <PlaceCard
-            name="Ramen Nagi"
-            key={"1"}
-            image="https://via.placeholder.com/160"
-            rating={4.6}
-            reviews={442}
-            category="Ramen Restaurants"
-            placeDescription={"Description here"}
-          />
-          <PlaceCard
-            name="Ramen Nagi"
-            key={"1"}
-            image="https://via.placeholder.com/160"
-            rating={4.6}
-            reviews={442}
-            category="Ramen Restaurants"
-            placeDescription={"Description here"}
-          />
-          <PlaceCard
-            name="Ramen Nagi"
-            key={"1"}
-            image="https://via.placeholder.com/160"
-            rating={4.6}
-            reviews={442}
-            category="Ramen Restaurants"
-            placeDescription={"Description here"}
-          />
-          <PlaceCard
-            name="Ramen Nagi"
-            key={"1"}
-            image="https://via.placeholder.com/160"
-            rating={4.6}
-            reviews={442}
-            category="Ramen Restaurants"
-            placeDescription={"Description here"}
-          />
+          {mapPlaces.map((place, i) => (
+            <PlaceCard
+              name={place.Locations?.location ?? ""}
+              key={place.property_id}
+              image={
+                place.Locations?.image ?? "https://via.placeholder.com/160"
+              }
+              rating={place.Locations?.rating ?? 0}
+              category={place.Locations?.category ?? ""}
+              placeDescription={map?.MapsPlaces[i].description}
+            />
+          ))}
         </div>
 
         <div className="flex-[2] min-h-96">
-          <AppleMap token={mapToken} />
+          <AppleMap token={mapToken} coordinatesArray={mapCoordinates} />
         </div>
       </section>
     </div>
