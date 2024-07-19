@@ -292,3 +292,8 @@ model MapsCollected {
   updated_at     DateTime @updatedAt
   map            Maps     @relation(fields: [map_id], references: [map_id])
 }
+
+model MapsCreator {
+  wallet_address String  @id
+  creator_bio    String?
+}

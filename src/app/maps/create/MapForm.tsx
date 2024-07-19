@@ -4,6 +4,7 @@ import AppleMap from "@/components/home/map";
 import Search from "@/components/home/search";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import ImageUpload from "@/components/ui/file-upload";
 import {
   FormControl,
   FormField,
@@ -94,20 +95,26 @@ const MapForm = ({
   heading = "Create a map",
   buttonText = "Create a map",
   mapToken = "",
+  bio = "",
   values = {
     map_id: "",
+    thumbnail: "",
     name: "",
     description: "",
+    creator_bio: "",
     emoji: "",
     places: [],
   },
 }: {
   heading?: string;
   buttonText?: string;
-  mapToken?: string;
+  mapToken?: string | undefined;
+  bio?: string | null;
   values?: {
     map_id?: string;
+    creator_bio?: string;
     name: string;
+    thumbnail: string;
     description: string;
     emoji: string;
     places: {
@@ -117,9 +124,7 @@ const MapForm = ({
   };
 }) => {
   const router = useRouter();
-
   const [openModal, setOpenModal] = useState(false);
-
   const form = useForm({
     defaultValues: values,
   });
@@ -130,28 +135,33 @@ const MapForm = ({
   });
 
   const onSubmit = async (values: any) => {
-    const { map_id, name, description, emoji, places } = values;
+    const { map_id, name, description, emoji, places, thumbnail, creator_bio } =
+      values;
 
     const response = map_id
       ? await updateMap({
           map_id,
           description: description,
           emoji: emoji,
+          thumbnail,
           name: name,
           places: places,
+          creator_bio,
         })
       : await createMap({
           description: description,
           emoji: emoji,
           name: name,
+          thumbnail,
           places: places,
+          creator_bio,
         });
 
     if (response.status == "error") {
       toast.error(response.message);
     } else {
       toast.success(
-        map_id ? "Map updated successfully" : " Map created successfully"
+        map_id ? "Map updated successfully" : "Map created successfully"
       );
 
       // redirect to the map page
@@ -160,6 +170,8 @@ const MapForm = ({
   };
 
   const emojiValue = form.watch("emoji");
+
+  console.log(form.getValues());
 
   return (
     <div className="mt-8 w-full max-w-7xl mx-auto mb-8 p-4 md:p-0">
@@ -189,13 +201,42 @@ const MapForm = ({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Map Description</FormLabel>
                     <FormControl>
                       <Textarea {...field} />
                     </FormControl>
                   </FormItem>
                 )}
               />
+
+              {bio || values.map_id ? null : (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="creator_bio"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Creator Bio</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+
+              <div>
+                <FormLabel className="mb-4 block">Thumbnail</FormLabel>
+                <ImageUpload
+                  path="checkin-maps"
+                  label="Thumbnail"
+                  multimedia
+                  handleUploadFile={(e) => {
+                    form.setValue("thumbnail", e);
+                  }}
+                />
+              </div>
 
               <Popover>
                 <PopoverTrigger asChild>
@@ -255,7 +296,7 @@ const MapForm = ({
                     setOpenModal(true);
                   }}
                 >
-                  <PlusIcon size={24} className="mr-2" />
+                  <PlusIcon size={24} className="mr-2 text-[#EF9854]" />
                   Add a Place
                 </a>
               </div>

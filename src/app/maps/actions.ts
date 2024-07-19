@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
+const AWS = require("aws-sdk");
 
 function generateSlug(name: string) {
   const slug = name
@@ -17,13 +18,17 @@ function generateSlug(name: string) {
 
 export async function createMap({
   name,
+  thumbnail,
   description,
   emoji,
   places,
+  creator_bio,
 }: {
   name: string;
   description: string;
+  thumbnail: string;
   emoji: string;
+  creator_bio: string;
   places: {
     property_id: string;
     description: string;
@@ -45,7 +50,7 @@ export async function createMap({
       name,
       description,
       slug: generateSlug(name),
-      thumbnail: "",
+      thumbnail: thumbnail,
       token_id: "",
       wallet_address: wallet_address,
       map_emoji: emoji,
@@ -57,6 +62,19 @@ export async function createMap({
           })),
         },
       },
+    },
+  });
+
+  await prisma.mapsCreator.upsert({
+    where: {
+      wallet_address: wallet_address,
+    },
+    create: {
+      creator_bio: creator_bio,
+      wallet_address: wallet_address,
+    },
+    update: {
+      creator_bio: creator_bio,
     },
   });
 
@@ -72,10 +90,14 @@ export async function updateMap({
   name,
   description,
   emoji,
+  creator_bio,
+  thumbnail,
   places,
 }: {
   map_id: string;
   name: string;
+  thumbnail: string;
+  creator_bio: string;
   description: string;
   emoji: string;
   places: {
@@ -114,8 +136,22 @@ export async function updateMap({
       },
       data: {
         name,
+        thumbnail,
         description,
         map_emoji: emoji,
+      },
+    });
+
+    await prisma.mapsCreator.upsert({
+      where: {
+        wallet_address: wallet_address,
+      },
+      create: {
+        creator_bio: creator_bio,
+        wallet_address: wallet_address,
+      },
+      update: {
+        creator_bio: creator_bio,
       },
     });
 
@@ -160,3 +196,36 @@ export async function getLocationInfo(property_id: string) {
 
   return property?.Locations;
 }
+
+export const getUploadUrl = async ({
+  name,
+  type,
+}: {
+  name: string;
+  type: string;
+}) => {
+  AWS.config.update({
+    accessKeyId: process.env.AWS_ACCESSKEYID,
+    secretAccessKey: process.env.AWS_SECRETACCESSKEY,
+  });
+
+  const s3 = new AWS.S3();
+
+  try {
+    console.log({ name, type });
+
+    const fileParams = {
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: name,
+      Expires: 600,
+      ContentType: type,
+      ACL: "public-read",
+    };
+
+    const url = await s3.getSignedUrlPromise("putObject", fileParams);
+
+    return url;
+  } catch (err) {
+    return null;
+  }
+};

@@ -6,16 +6,15 @@ import Applayout from "./Applayout";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MAPs - Checkin “Checkin and Earn”",
-  description:
-    "With Property NFTs, you can own NFTs of your favourite properties from famous places like Eiffel Tower or your local cafe!",
+  title: "MAPs by Checkin",
+  description: "Curate, Mint, Earn. Your Recommendations, onchain.",
   twitter: {
-    images: "https://i.imgur.com/TzyLczi.png",
-    title: "Onchain Property NFTs - Checkin “Checkin and Earn",
-    description: `With Property NFTs, you can own NFTs of your favourite properties from famous places like Eiffel Tower or your local cafe!`,
+    images: "https://i.imgur.com/4zk2g3M.png",
+    title: "MAPs by Checkin",
+    description: `Curate, Mint, Earn. Your Recommendations, onchain.`,
   },
   openGraph: {
-    images: "https://i.imgur.com/TzyLczi.png",
+    images: "https://i.imgur.com/4zk2g3M.png",
   },
 };
 

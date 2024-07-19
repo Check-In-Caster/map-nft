@@ -25,7 +25,6 @@ const Page = async ({
   searchParams: Record<string, string>;
 }) => {
   const map = await getMapDetails(params.map_id);
-  console.log(map);
 
   const mapToken = await getMapsToken();
 
@@ -39,10 +38,12 @@ const Page = async ({
       heading="Edit Map"
       buttonText="Submit"
       mapToken={mapToken}
+      bio="hide"
       values={{
         map_id: map.map_id,
         name: map.name,
         description: map.description!,
+        thumbnail: map.thumbnail!,
         emoji: map.map_emoji!,
         places: map.MapsPlaces.map((place) => ({
           property_id: place.property_id!,

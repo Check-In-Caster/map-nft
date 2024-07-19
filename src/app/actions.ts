@@ -1,9 +1,9 @@
 "use server";
 
-import { NFT_PRICE } from "@/config";
 import { createNewToken } from "@/lib/deployToken";
 import { prisma } from "@/lib/prisma";
 import "@ethersproject/shims";
+import { ethers } from "ethers";
 
 export default async function updateMintRecords({
   wallet_address,
@@ -70,13 +70,11 @@ export async function deployToken(property_id: string, type?: string) {
     return Number(propertyInfo.token_id);
   }
 
-  type = "city";
-
   const tokenId = await createNewToken({
-    maxSupply: 1000,
-    mintLimit: 100,
-    price: type ? NFT_PRICE.town : 0,
-    tokenURI: "https://property.checkin.gg/api/metadata/",
+    maxSupply: Number(ethers.constants.MaxInt256),
+    mintLimit: Number(ethers.constants.MaxInt256),
+    price: 0.000777,
+    tokenURI: "https://maps.checkin.gg/api/metadata/",
   });
 
   if (tokenId) {
