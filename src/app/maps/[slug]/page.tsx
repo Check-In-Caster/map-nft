@@ -5,41 +5,33 @@ import { shortenAddress } from "@/lib/utils";
 import { getMapsToken } from "@/components/home/actions";
 import AppleMap from "@/components/home/map";
 import { prisma } from "@/lib/prisma";
+import { getFarcasterAccount } from "@/lib/airstack";
+import { notFound } from "next/navigation";
+import NFTCard from "@/components/home/nft-card";
 
 const lexend = Lexend({
   subsets: ["latin"],
 });
 
-const mapData = {
-  map_id: "1",
-  name: "Top 10 Ramen in Tokyo",
-  slug: "top-10-ramen-in-tokyo",
-  creator: {
-    wallet: "0x13F37fE246C8a927B339E6c095AFbda275709100",
-    farcaster: {
-      name: "yuki",
-      imgUrl:
-        "https://imagedelivery.net/BXluQx4ige9GuW0Ia56BHw/ba776434-7fd2-4038-34be-f17e94546300/original",
-    },
-  },
-  map_emoji: "🍜",
-  description:
-    "I just consolidated my favorite ramen restaurants in Tokyo, from affordable to expensive",
-};
-
 const PlaceCard = ({
+  property_id,
   name,
   image,
   rating,
   category,
+  wallet_address,
   placeDescription,
 }: {
+  property_id: string;
   name: string;
   image: string;
   rating: number;
   category: string;
+  wallet_address: string;
   placeDescription: React.ReactNode;
 }) => {
+  const propertyLink = `https://property.checkin.gg?property=${property_id}&ref=${wallet_address}`;
+
   return (
     <>
       <div className="flex">
@@ -58,9 +50,13 @@ const PlaceCard = ({
           </div>
           <div className="font-light">{category}</div>
           <div className="font-thin">{placeDescription}</div>
-          <button className="bg-white border border-[#5844C1] mt-3 py-1.5">
+          <a
+            href={propertyLink}
+            target="_blank"
+            className="bg-white text-center border border-[#5844C1] mt-3 py-1.5"
+          >
             Mint
-          </button>
+          </a>
         </div>
       </div>
     </>
@@ -77,7 +73,6 @@ const MapDetailsPage = async ({
   searchParams: Record<string, string>;
 }) => {
   const { slug } = params;
-  const mapToken = await getMapsToken();
 
   const map = await prisma.maps.findFirst({
     where: {
@@ -88,7 +83,13 @@ const MapDetailsPage = async ({
     },
   });
 
-  const mapPlaces = await prisma.propertyInfo.findMany({
+  if (!map) {
+    notFound();
+  }
+
+  const mapToken = await getMapsToken();
+
+  let mapPlaces = await prisma.propertyInfo.findMany({
     where: {
       property_id: {
         in: map?.MapsPlaces.map((place) => place.property_id),
@@ -98,6 +99,19 @@ const MapDetailsPage = async ({
       Locations: true,
     },
   });
+
+  // sorting the mapPlaces array based on the order of the map.MapsPlaces array
+  const mapPlacesMap = new Map(
+    mapPlaces.map((place) => [place.property_id, place])
+  );
+  mapPlaces = [];
+  for (const place of map.MapsPlaces) {
+    if (mapPlacesMap.has(place.property_id)) {
+      mapPlaces.push(
+        mapPlacesMap.get(place.property_id) as (typeof mapPlaces)[number]
+      );
+    }
+  }
 
   const mapCoordinates = mapPlaces.map((place) => {
     const coordinates = place.Locations?.coordinates as {
@@ -109,6 +123,11 @@ const MapDetailsPage = async ({
       lng: coordinates.lng ?? 0,
     };
   });
+
+  const farcasterProfile =
+    map.wallet_address != ""
+      ? await getFarcasterAccount(map?.wallet_address)
+      : null;
 
   return (
     <div className="mt-8 max-w-7xl mx-auto mb-8 p-2 md:p-0">
@@ -124,23 +143,44 @@ const MapDetailsPage = async ({
           <div className="flex gap-2 items-center mt-3">
             <Image
               src={
-                mapData.creator.farcaster?.imgUrl ??
+                farcasterProfile?.profileImage ??
                 "https://i.imgur.com/yZOyUGG.png"
               }
-              alt={mapData.creator.farcaster?.name ?? ""}
+              alt={farcasterProfile?.profileName ?? ""}
               height={28}
               width={28}
               className="rounded-full h-7 w-7 object-cover"
             />
             <span className="text-sm">
-              {mapData.creator.farcaster?.name ??
+              {farcasterProfile?.profileName ??
                 shortenAddress(map?.wallet_address ?? "")}
             </span>
           </div>
 
-          <button className="bg-[#5844C1] text-white mt-3 px-10 py-2 text-lg">
-            Mint to Support
-          </button>
+          <div>
+            <NFTCard
+              key={map.map_id}
+              property_id={map.map_id!}
+              token_id={undefined}
+              title={map.name}
+              slug={map.slug}
+              imgUrl={map.thumbnail ?? "https://via.placeholder.com/160"}
+              emoji={map.map_emoji ?? ""}
+              creator={{
+                wallet: map.wallet_address,
+                farcaster: {
+                  imgUrl:
+                    farcasterProfile?.profileImage ??
+                    "https://i.imgur.com/yZOyUGG.png",
+                  name: farcasterProfile?.profileName,
+                },
+              }}
+              hideCard
+              hide_view_btn
+              buttonClassName="bg-[#5844C1] text-white mt-3 px-10 py-2 text-lg"
+              mintButtonText="Mint to Support"
+            />
+          </div>
         </div>
         <div className="flex gap-4 items-start">
           <button className="rounded-full p-2 hover:shadow-md hover:bg-white outline-none focus:outline-none focus-within:outline-none">
@@ -156,6 +196,7 @@ const MapDetailsPage = async ({
         <div className="flex-1 flex flex-col gap-y-5">
           {mapPlaces.map((place, i) => (
             <PlaceCard
+              property_id={place.property_id}
               name={place.Locations?.location ?? ""}
               key={place.property_id}
               image={
@@ -163,6 +204,7 @@ const MapDetailsPage = async ({
               }
               rating={place.Locations?.rating ?? 0}
               category={place.Locations?.category ?? ""}
+              wallet_address={map.wallet_address}
               placeDescription={map?.MapsPlaces[i].description}
             />
           ))}

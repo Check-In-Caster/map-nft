@@ -10,7 +10,7 @@ import {
   baseZoraMinterContractAddress,
 } from "@/config";
 import { baseZoraTokenABI } from "@/constants/zora";
-import { isValidEthAddress, shortenAddress } from "@/lib/utils";
+import { cn, isValidEthAddress, shortenAddress } from "@/lib/utils";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import confetti from "canvas-confetti";
 import { ethers } from "ethers";
@@ -213,8 +213,10 @@ const NFTCard = ({
   slug,
   className,
   buttonClassName,
+  mintButtonText = "Mint",
   title,
   hide_mint_btn = false,
+  hide_view_btn = false,
   userMinted = 0,
   imgUrl,
   emoji,
@@ -229,7 +231,9 @@ const NFTCard = ({
   slug: string;
   className?: string;
   buttonClassName?: string;
+  mintButtonText?: string;
   hide_mint_btn?: boolean;
+  hide_view_btn?: boolean;
   title: string;
   userMinted?: number;
   imgUrl?: string;
@@ -453,7 +457,7 @@ const NFTCard = ({
                   {(account.addresses ?? [])?.length > 0 ? (
                     <>
                       <button
-                        className="bg-[#5844C1] text-[#000] border border-gray-900 py-2 px-5 w-full"
+                        className="bg-[#5844C1] text-[#fff] border border-gray-900 py-2 px-5 w-full"
                         onClick={mint}
                         disabled={mintedLoading}
                       >
@@ -489,46 +493,48 @@ const NFTCard = ({
             />
           )}
         </DialogContent>
-        {hideCard ? null : (
-          <>
-            <div className="h-full flex flex-col">
-              <DialogTrigger asChild className="h-full">
-                <div>
-                  <Card
-                    className={className}
-                    minted={userMinted}
-                    title={title}
-                    imgUrl={imgUrl}
-                    emoji={emoji}
-                    creator={creator}
-                  />
-                </div>
-              </DialogTrigger>
 
+        <div className={hideCard ? "" : "h-full flex flex-col"}>
+          {hideCard ? null : (
+            <DialogTrigger asChild className="h-full">
+              <div>
+                <Card
+                  className={className}
+                  minted={userMinted}
+                  title={title}
+                  imgUrl={imgUrl}
+                  emoji={emoji}
+                  creator={creator}
+                />
+              </div>
+            </DialogTrigger>
+          )}
+
+          {hide_mint_btn && hide_view_btn ? null : (
+            <div className="flex gap-2">
+              {hide_view_btn ? null : (
+                <Link
+                  href={`/maps/${slug}`}
+                  className={`border text-center border-[#5844C1] py-2 mt-5 w-full disabled:opacity-50 bg-[#fff] text-[#5844C1]`}
+                >
+                  View
+                </Link>
+              )}
               {hide_mint_btn ? null : (
-                <div className="flex gap-2 px-1">
-                  <Link
-                    href={`/maps/${slug}`}
-                    className={`border text-center border-[#5844C1] py-2 mt-5 w-full disabled:opacity-50 bg-[#fff] text-[#5844C1]`}
+                <DialogTrigger asChild>
+                  <button
+                    className={cn(
+                      "border text-center border-[#5844C1] py-2 mt-5 w-full disabled:opacity-50 bg-[#5844C1] text-[#fff]",
+                      buttonClassName
+                    )}
                   >
-                    View
-                  </Link>
-                  <DialogTrigger asChild>
-                    <button
-                      className={`border text-center border-[#5844C1] py-2 mt-5 w-full disabled:opacity-50 ${
-                        buttonClassName
-                          ? buttonClassName
-                          : "bg-[#5844C1] text-[#fff]"
-                      }`}
-                    >
-                      Mint
-                    </button>
-                  </DialogTrigger>
-                </div>
+                    {mintButtonText}
+                  </button>
+                </DialogTrigger>
               )}
             </div>
-          </>
-        )}
+          )}
+        </div>
       </Dialog>
     </div>
   );
