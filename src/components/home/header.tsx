@@ -106,7 +106,7 @@ const Navigation = ({ mobileNav }: { mobileNav?: boolean }) => {
     <>
       <NavLink
         label="My Maps"
-        href={address ? `/lists/${address}` : undefined}
+        href={address ? `/my-maps/${address}` : undefined}
         onClick={handleMyMapsClick}
         mobile={mobileNav}
       />
@@ -122,8 +122,9 @@ const Navigation = ({ mobileNav }: { mobileNav?: boolean }) => {
         external
         mobile={mobileNav}
       />
+
       {!mobileNav && (
-        <div className="bg-[#5844C1] min-h-[48px] w-full grid place-items-center connect-wallet">
+        <div className="min-h-[48px] w-full grid place-items-center connect-wallet">
           <ConnectButton
             showBalance={false}
             accountStatus={"address"}
@@ -131,6 +132,12 @@ const Navigation = ({ mobileNav }: { mobileNav?: boolean }) => {
           />
         </div>
       )}
+
+      <div className="bg-[#5844C1] text-[#fff] min-h-[48px] w-full grid place-items-center connect-wallet cursor-pointer">
+        <Link href="/maps/create" passHref>
+          Create
+        </Link>
+      </div>
     </>
   );
 };

@@ -201,6 +201,7 @@ model PropertySales {
   updated_at     DateTime?     @default(now()) @db.Timestamp(6)
   tx_hash        String?
   quantity       Int?          @default(1) @db.SmallInt
+  category       String?       @db.VarChar(255)
   PropertyInfo   PropertyInfo? @relation(fields: [property_id], references: [property_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
@@ -232,26 +233,6 @@ model AirdropProperty {
   special         Int?    @default(0) @db.SmallInt
 }
 
-model AirdropAllocation {
-  fid            Int?
-  wallet_address String  @id
-  total_amount   BigInt?
-}
-
-model AirdropClone {
-  airdrop_id      String  @id(map: "Airdrop_Clone_pkey") @db.Uuid
-  fid             String?
-  wallet_address  String?
-  farcon_attendee String?
-  checkin_points  String?
-  checkin_count   String?
-  tip_amount      String?
-  season          String?
-  farcon_points   String?
-  dpad_stake      String?
-  total_amount    BigInt?
-}
-
 model AirdropExcelFinal {
   airdrop_id      String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   fid             String?
@@ -264,4 +245,55 @@ model AirdropExcelFinal {
   farcon_points   String?
   dpad_stake      String?
   total_amount    BigInt?
+}
+
+model Maps {
+  map_id         String          @id @default(uuid()) @db.Uuid
+  name           String
+  slug           String          @unique
+  description    String?
+  thumbnail      String?
+  wallet_address String
+  map_emoji      String?
+  token_id       String
+  total_minted   Decimal?        @default(0) @db.Decimal
+  token_gated    Boolean?        @default(false)
+  eth_amount     String?
+  MapsCollected  MapsCollected[]
+  MapsLiked      MapsLiked[]
+  MapsPlaces     MapsPlaces[]
+}
+
+model MapsPlaces {
+  map_id      String  @db.Uuid
+  description String?
+  property_id String  @db.Uuid
+  map         Maps    @relation(fields: [map_id], references: [map_id])
+
+  @@id([map_id, property_id])
+}
+
+model MapsLiked {
+  map_id         String @db.Uuid
+  wallet_address String
+  map            Maps   @relation(fields: [map_id], references: [map_id])
+
+  @@id([map_id, wallet_address])
+}
+
+model MapsCollected {
+  collected_id   String   @id @default(uuid()) @db.Uuid
+  map_id         String   @db.Uuid
+  wallet_address String
+  token_id       String
+  quantity       Int
+  tx_hash        String
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+  map            Maps     @relation(fields: [map_id], references: [map_id])
+}
+
+model MapsCreator {
+  wallet_address String  @id
+  creator_bio    String?
 }

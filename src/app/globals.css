@@ -42,12 +42,13 @@ body {
 }
 
 .connect-wallet button {
-  color: #fff !important;
-  background: #5844c1 !important;
+  color: #000 !important;
+  background: #faf3eb !important;
   box-shadow: none !important;
 }
 
 .connect-wallet button div {
+  color: #fff !important;
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
@@ -81,4 +82,8 @@ body {
   transform: rotateY(180deg);
   background-color: rgba(0, 0, 0, 0.7);
   color: white;
+}
+
+.epr-main{
+   border: 0px !important;
 }
