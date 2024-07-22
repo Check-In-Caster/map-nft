@@ -1,8 +1,12 @@
 import { getMapsToken } from "@/components/home/actions";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 import MapForm from "../../create/MapForm";
 
 const getMapDetails = async (id: string) => {
+  const session = await getServerSession();
+
   const map = await prisma.maps.findFirst({
     where: {
       map_id: id,
@@ -11,6 +15,10 @@ const getMapDetails = async (id: string) => {
       MapsPlaces: true,
     },
   });
+
+  if (map?.wallet_address !== session?.user?.name?.toLocaleLowerCase()) {
+    return null;
+  }
 
   return map;
 };
@@ -25,6 +33,10 @@ const Page = async ({
   searchParams: Record<string, string>;
 }) => {
   const map = await getMapDetails(params.map_id);
+
+  if (!map) {
+    return redirect("/");
+  }
 
   const mapToken = await getMapsToken();
 
