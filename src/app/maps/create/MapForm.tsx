@@ -3,7 +3,6 @@
 import AppleMap from "@/components/home/map";
 import Search from "@/components/home/search";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import ImageUpload from "@/components/ui/file-upload";
 import {
   FormControl,
@@ -21,52 +20,48 @@ import { Textarea } from "@/components/ui/textarea";
 import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { PlusIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { createMap, getLocationInfo, updateMap } from "../actions";
+import { createMap, updateMap } from "../actions";
 
 const PlaceCard = ({
   property_id,
+  placeSearch,
   placeDescription,
+  placesMap,
   removePlace,
 }: {
   property_id: string;
+  placeSearch: React.ReactNode;
   placeDescription: React.ReactNode;
+  placesMap: Map<
+    string,
+    {
+      name: string;
+      image: string;
+      rating: number;
+      category: string;
+      coordinates: { lat: number; lng: number };
+    }
+  >;
   removePlace?: React.ReactNode;
 }) => {
-  const [location, setLocation] = useState<{
-    name: string;
-    image: string;
-    rating: number;
-    category: string;
-  } | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      const location = await getLocationInfo(property_id);
-
-      if (location)
-        setLocation({
-          name: location.location ?? "",
-          image: location.image ?? "",
-          rating: location.rating ?? 0,
-          category: location.category ?? "",
-        });
-    })();
-  }, [property_id]);
+  const location = placesMap.get(property_id);
 
   return (
     <>
-      <div className="flex mt-4">
-        <div>
-          <img
-            src={location?.image ?? "https://via.placeholder.com/96"}
-            alt="place"
-            className="rounded w-24 aspect-square object-cover"
-          />
-        </div>
-        <div className="w-full pl-6 relative">
+      <div className="flex mt-4 gap-x-6">
+        {location ? (
+          <div>
+            <img
+              src={location?.image ?? "https://via.placeholder.com/96"}
+              alt="place"
+              className="rounded w-24 aspect-square object-cover"
+            />
+          </div>
+        ) : null}
+        <div className="w-full relative">
           {location ? (
             <>
               <div className="text-xl">{location.name}</div>
@@ -80,13 +75,15 @@ const PlaceCard = ({
               </div>
               <div className="font-light">{location.category}</div>
             </>
-          ) : null}
+          ) : (
+            placeSearch
+          )}
 
           <div className="absolute right-0 top-0">{removePlace}</div>
         </div>
       </div>
 
-      {placeDescription}
+      {location ? placeDescription : null}
     </>
   );
 };
@@ -124,12 +121,23 @@ const MapForm = ({
   };
 }) => {
   const router = useRouter();
-  const [openModal, setOpenModal] = useState(false);
+  const [placesMap, setPlacesMap] = useState<
+    Map<
+      string,
+      {
+        name: string;
+        image: string;
+        rating: number;
+        category: string;
+        coordinates: { lat: number; lng: number };
+      }
+    >
+  >(new Map());
   const form = useForm({
     defaultValues: values,
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, update } = useFieldArray({
     control: form.control,
     name: "places",
   });
@@ -263,10 +271,42 @@ const MapForm = ({
                   <PlaceCard
                     key={item.id}
                     property_id={item.property_id}
+                    placesMap={placesMap}
                     removePlace={
-                      <button type="button" onClick={() => remove(index)}>
+                      <button
+                        type="button"
+                        className="mt-2"
+                        onClick={() => remove(index)}
+                      >
                         <X size={24} />{" "}
                       </button>
+                    }
+                    placeSearch={
+                      <div className="pr-8">
+                        <Search
+                          setProperty={(property) => {
+                            update(index, {
+                              ...fields[index],
+                              property_id: property.property_id,
+                            });
+
+                            const newPlacesMap = new Map(
+                              JSON.parse(JSON.stringify(Array.from(placesMap)))
+                            ) as typeof placesMap;
+                            newPlacesMap.set(property.property_id, {
+                              name: property.Locations.location ?? "",
+                              image: property.Locations.image ?? "",
+                              rating: property.Locations.rating ?? 0,
+                              category: property.Locations.category ?? "",
+                              coordinates: property.Locations.coordinates as {
+                                lat: number;
+                                lng: number;
+                              },
+                            });
+                            setPlacesMap(newPlacesMap);
+                          }}
+                        />
+                      </div>
                     }
                     placeDescription={
                       <FormField
@@ -293,7 +333,10 @@ const MapForm = ({
                 <a
                   className="mt-8 flex items-center cursor-pointer"
                   onClick={() => {
-                    setOpenModal(true);
+                    append({
+                      description: "",
+                      property_id: "",
+                    });
                   }}
                 >
                   <PlusIcon size={24} className="mr-2 text-[#EF9854]" />
@@ -309,51 +352,30 @@ const MapForm = ({
             </form>
           </FormProvider>
         </div>
-        <div className="grid place-items-center">
+        <div className="grid place-items-center max-h-[800px]">
           <AppleMap
             token={mapToken}
-            // coordinatesArray={userProperties
-            //   .map((property) => {
-            //     const coordinates = property.PropertyInfo?.Locations
-            //       .coordinates as { lat: number; lng: number } | undefined;
-            //     if (coordinates)
-            //       return {
-            //         lat: coordinates.lat,
-            //         lng: coordinates.lng,
-            //       };
-            //   })
-            //   .filter((c): c is { lat: number; lng: number } => !!c)}
+            coordinatesArray={(() => {
+              const propertyIds = form
+                .getValues()
+                .places.map((place) => place.property_id);
+
+              let coordinates: {
+                lat: number;
+                lng: number;
+              }[] = [];
+
+              for (const propertyId of propertyIds) {
+                const location = placesMap.get(propertyId);
+                if (location?.coordinates)
+                  coordinates.push(location.coordinates);
+              }
+
+              return coordinates;
+            })()}
           />
         </div>
       </div>
-
-      <Dialog
-        open={openModal}
-        onOpenChange={(open) => {
-          if (!open) {
-            setOpenModal(false);
-          }
-        }}
-      >
-        <DialogContent className="h-96 max-w-[800px] w-full">
-          <div>
-            <div className="bg-white">
-              <Search
-                setProperty={(property) => {
-                  append({
-                    description: "",
-                    property_id: property.property_id,
-                  });
-                  setOpenModal(false);
-                }}
-              />
-            </div>
-            <div className="text-center h-full flex items-center justify-center pb-20">
-              Search to get a list of locations
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
