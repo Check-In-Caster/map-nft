@@ -6,6 +6,7 @@ import React from "react";
 
 import Footer from "@/components/home/footer";
 import Header from "@/components/home/header";
+import PromoModal from "@/components/home/promo-modal";
 import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { RainbowKitSiweNextAuthProvider } from "@rainbow-me/rainbowkit-siwe-next-auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -59,6 +60,7 @@ const Applayout = ({
                   <>
                     {/* <FreeOnChainBanner /> */}
                     <Header />
+                    <PromoModal />
                   </>
                 ) : null}
                 {children}
