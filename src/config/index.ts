@@ -3,7 +3,7 @@ export const DOMAIN =
     ? "http://localhost:3000"
     : process.env.NEXT_PUBLIC_DOMAIN
     ? `https://${process.env.NEXT_PUBLIC_DOMAIN}`
-    : "https://property.checkin.gg";
+    : "https://maps.checkin.gg";
 
 // const is_dev = process.env.NODE_ENV === "development";
 const is_dev = true;

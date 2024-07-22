@@ -229,3 +229,49 @@ export const getUploadUrl = async ({
     return null;
   }
 };
+
+export const markFavorite = async ({ map_id }: { map_id: string }) => {
+  const session = await getServerSession();
+
+  const wallet_address = session?.user?.name?.toLocaleLowerCase() ?? "";
+
+  if (!wallet_address) {
+    return {
+      status: "error",
+      message: "Please connect wallet to continue",
+    };
+  }
+
+  const favorite = await prisma.mapsLiked.findFirst({
+    where: {
+      map_id,
+      wallet_address,
+    },
+  });
+
+  if (favorite) {
+    await prisma.mapsLiked.deleteMany({
+      where: {
+        map_id: favorite.map_id,
+        wallet_address: favorite.wallet_address,
+      },
+    });
+
+    return {
+      status: "success",
+      message: "Removed from favorites",
+    };
+  }
+
+  await prisma.mapsLiked.create({
+    data: {
+      map_id,
+      wallet_address,
+    },
+  });
+
+  return {
+    status: "success",
+    message: "Added to favorites",
+  };
+};

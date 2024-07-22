@@ -58,7 +58,7 @@ const MyStats = ({
             </p>
           </div>
         </div>
-        <div className="flex flex-col md:flex-row space-x-5 items-center justify-between w-full md:min-w-[500px] my-10 md:my-0">
+        <div className="flex flex-col md:flex-row space-x-5 items-center justify-between min-w-[500px] my-10 md:my-0">
           <div className="py-4 text-center bg-white p-2 w-full md:w-2/3 my-3 md:my-0 md:min-w-40 h-24">
             <p className="text-lg font-medium">Maps Created</p>
             <p className="text-3xl font-semibold mt-2">{stats?.maps_created}</p>

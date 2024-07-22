@@ -4,10 +4,11 @@ import NFTCard from "@/components/home/nft-card";
 import { getFarcasterAccount } from "@/lib/airstack";
 import { prisma } from "@/lib/prisma";
 import { shortenAddress } from "@/lib/utils";
-import { Heart, Share } from "lucide-react";
 import { Lexend } from "next/font/google";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import LikeMap from "./LikeMap";
+import ShareMap from "./ShareMap";
 
 const lexend = Lexend({
   subsets: ["latin"],
@@ -87,6 +88,19 @@ const MapDetailsPage = async ({
     notFound();
   }
 
+  const creator = await prisma.mapsCreator.findFirst({
+    where: {
+      wallet_address: map.wallet_address,
+    },
+  });
+
+  const liked = await prisma.mapsLiked.findFirst({
+    where: {
+      wallet_address: map.wallet_address,
+      map_id: map.map_id,
+    },
+  });
+
   const mapToken = await getMapsToken();
 
   let mapPlaces = await prisma.propertyInfo.findMany({
@@ -157,6 +171,8 @@ const MapDetailsPage = async ({
             </span>
           </div>
 
+          <div className="mt-5 font-normal">{creator?.creator_bio}</div>
+
           <div>
             <NFTCard
               key={map.map_id}
@@ -183,12 +199,9 @@ const MapDetailsPage = async ({
           </div>
         </div>
         <div className="flex gap-4 items-start">
-          <button className="rounded-full p-2 hover:shadow-md hover:bg-white outline-none focus:outline-none focus-within:outline-none">
-            <Heart />
-          </button>
-          <button className="rounded-full p-2 hover:shadow-md hover:bg-white outline-none focus:outline-none focus-within:outline-none">
-            <Share />
-          </button>
+          <LikeMap map_id={map.map_id} liked={liked ? true : false} />
+
+          <ShareMap slug={map.slug} />
         </div>
       </section>
 

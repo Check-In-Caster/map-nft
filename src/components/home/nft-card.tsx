@@ -382,7 +382,7 @@ const NFTCard = ({
     setMintLoading(false);
   };
 
-  const shareUrl = `https://property.checkin.gg/?property=${property_id}&ref=${account.address}`;
+  const shareUrl = `https://maps.checkin.gg/maps/${slug}/?ref=${account.address}`;
   const shareText = `Just minted ${title} on CheckIn!`;
 
   return (

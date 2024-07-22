@@ -1,3 +1,3 @@
-# CheckIn Property
- 
-https://property.checkin.gg  
+# CheckIn Maps NFT
+
+https://maps.checkin.gg
