@@ -1,13 +1,13 @@
-import { Heart, Share } from "lucide-react";
-import Image from "next/image";
-import { Lexend } from "next/font/google";
-import { shortenAddress } from "@/lib/utils";
 import { getMapsToken } from "@/components/home/actions";
 import AppleMap from "@/components/home/map";
-import { prisma } from "@/lib/prisma";
-import { getFarcasterAccount } from "@/lib/airstack";
-import { notFound } from "next/navigation";
 import NFTCard from "@/components/home/nft-card";
+import { getFarcasterAccount } from "@/lib/airstack";
+import { prisma } from "@/lib/prisma";
+import { shortenAddress } from "@/lib/utils";
+import { Heart, Share } from "lucide-react";
+import { Lexend } from "next/font/google";
+import Image from "next/image";
+import { notFound } from "next/navigation";
 
 const lexend = Lexend({
   subsets: ["latin"],
@@ -161,7 +161,7 @@ const MapDetailsPage = async ({
             <NFTCard
               key={map.map_id}
               property_id={map.map_id!}
-              token_id={undefined}
+              token_id={map.token_id ? Number(map.token_id) : undefined}
               title={map.name}
               slug={map.slug}
               imgUrl={map.thumbnail ?? "https://via.placeholder.com/160"}

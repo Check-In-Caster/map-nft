@@ -306,27 +306,13 @@ const NFTCard = ({
     }
 
     try {
-      // const provider =
-      //   signer?.provider ?? new ethers.providers.JsonRpcProvider(RPC_PROVIDER);
-
-      // const contract = new ethers.Contract(
-      //   CONTRACT_ADDRESS,
-      //   baseZoraTokenABI,
-      //   signer
-      // );
-
       const refAddress = isValidEthAddress(referral ? referral : "");
-
-      console.log(String(count * (0.000777 + price)));
-
-      // const network = await provider.getNetwork();
-      // const connectedChainId = network.chainId;
-      // console.log(connectedChainId);
 
       if (account.chainId !== CHAIN_ID) {
         toast("Please connect to the correct network. Chain ID: " + CHAIN_ID);
         return;
       }
+      console.log(String(count * (0.000777 + price)));
 
       console.log(BigInt(`${count * (0.000777 + price) * 1000000}`));
 
@@ -336,8 +322,13 @@ const NFTCard = ({
       const totalValueInWei = priceInWei.add(multiplier).mul(count);
       const totalValueInBigInt = totalValueInWei.toBigInt();
 
+      console.log("________________________________");
+      console.log("totalValueInBigInt");
+      console.log(totalValueInBigInt);
+      console.log("________________________________");
+
       const _mint = await writeContractAsync({
-        address: CONTRACT_ADDRESS,
+        address: CONTRACT_ADDRESS!,
         chainId: CHAIN_ID,
         abi: baseZoraTokenABI,
         functionName: "mintWithRewards",
