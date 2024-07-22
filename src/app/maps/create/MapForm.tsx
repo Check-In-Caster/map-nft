@@ -21,6 +21,8 @@ import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { PlusIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { createMap, updateMap } from "../actions";
@@ -88,6 +90,25 @@ const PlaceCard = ({
   );
 };
 
+const formSchema = z.object({
+  map_id: z.string().optional(),
+  creator_bio: z.string(),
+  name: z.string().min(2, { message: "Name must have at least 2 characters" }),
+  thumbnail: z.string(),
+  description: z
+    .string()
+    .min(3, { message: "Description must have at least 3 characters" }),
+  emoji: z.string(),
+  places: z
+    .array(
+      z.object({
+        property_id: z.string(),
+        description: z.string(),
+      })
+    )
+    .min(1, { message: "You must add at least one place" }),
+});
+
 const MapForm = ({
   heading = "Create a map",
   buttonText = "Create a map",
@@ -133,7 +154,9 @@ const MapForm = ({
       }
     >
   >(new Map());
-  const form = useForm({
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: values,
   });
 
@@ -142,7 +165,12 @@ const MapForm = ({
     name: "places",
   });
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (values.thumbnail === "" && values.emoji === "") {
+      toast.error("Please upload a thumbnail or select an emoji");
+      return;
+    }
+
     const { map_id, name, description, emoji, places, thumbnail, creator_bio } =
       values;
 
@@ -200,6 +228,11 @@ const MapForm = ({
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
+                    {form.formState.errors.name && (
+                      <div className="text-red-500 text-sm">
+                        {form.formState.errors.name.message}
+                      </div>
+                    )}
                   </FormItem>
                 )}
               />
@@ -213,6 +246,11 @@ const MapForm = ({
                     <FormControl>
                       <Textarea {...field} />
                     </FormControl>
+                    {form.formState.errors.description && (
+                      <div className="text-red-500 text-sm">
+                        {form.formState.errors.description.message}
+                      </div>
+                    )}
                   </FormItem>
                 )}
               />
@@ -342,6 +380,11 @@ const MapForm = ({
                   <PlusIcon size={24} className="mr-2 text-[#EF9854]" />
                   Add a Place
                 </a>
+                {form.formState.errors.places && (
+                  <div className="text-red-500 text-sm mt-2">
+                    {form.formState.errors.places.message}
+                  </div>
+                )}
               </div>
               <button
                 type="submit"
