@@ -58,25 +58,25 @@ const MyStats = ({
             </p>
           </div>
         </div>
-        <div className="flex flex-col md:flex-row space-x-5 items-center justify-between min-w-[500px] my-10 md:my-0">
-          <div className="py-4 text-center bg-white p-2 w-2/3 my-3 md:my-0 md:min-w-40 h-24">
+        <div className="flex flex-col md:flex-row space-x-5 items-center justify-between w-full md:min-w-[500px] my-10 md:my-0">
+          <div className="py-4 text-center bg-white p-2 w-full md:w-2/3 my-3 md:my-0 md:min-w-40 h-24">
             <p className="text-lg font-medium">Maps Created</p>
             <p className="text-3xl font-semibold mt-2">{stats?.maps_created}</p>
           </div>
-          <div className="py-4 text-center bg-white p-2 w-2/3 my-3 md:my-0 md:min-w-40 h-24">
+          <div className="py-4 text-center bg-white p-2 w-full md:w-2/3 my-3 md:my-0 md:min-w-40 h-24">
             <p className="text-lg font-medium">Maps Collected</p>
             <p className="text-3xl font-semibold mt-2">
               {stats?.maps_collected}
             </p>
           </div>
-          <div className="py-4 text-center bg-white p-2 w-2/3 my-3 md:my-0 md:min-w-40 h-24">
+          <div className="py-4 text-center bg-white p-2 w-full md:w-2/3 my-3 md:my-0 md:min-w-40 h-24">
             <p className="text-lg font-medium">Checkins</p>
             <p className="text-3xl font-semibold mt-2">{checkInCount}</p>
           </div>
         </div>
       </div>
       <div>
-        <div className="flex mt-20 justify-center items-center">
+        <div className="flex md:mt-20 justify-center items-center">
           <div className="ml-auto">
             <ShareRefLink wallet_address={walletAddress} />
           </div>

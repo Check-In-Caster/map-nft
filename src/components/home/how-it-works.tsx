@@ -7,7 +7,7 @@ const HowItWorks = () => {
       <div className="text-center my-10">
         <Heading label="How it works for MAP creators" />
       </div>
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid md:grid-cols-3 gap-5">
         <div className="flex items-center justify-between flex-col">
           <img
             src="/assets/images/how_it_works1.png"

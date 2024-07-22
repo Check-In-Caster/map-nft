@@ -122,6 +122,9 @@ const Navigation = ({ mobileNav }: { mobileNav?: boolean }) => {
         external
         mobile={mobileNav}
       />
+      {mobileNav && (
+        <NavLink label="Create" href="/maps/create" mobile={mobileNav} />
+      )}
 
       {!mobileNav && (
         <div className="min-h-[48px] w-full grid place-items-center connect-wallet">
@@ -133,11 +136,13 @@ const Navigation = ({ mobileNav }: { mobileNav?: boolean }) => {
         </div>
       )}
 
-      <div className="bg-[#5844C1] text-[#fff] min-h-[48px] w-full grid place-items-center connect-wallet cursor-pointer">
-        <Link href="/maps/create" passHref>
-          Create
-        </Link>
-      </div>
+      {!mobileNav && (
+        <div className="bg-[#5844C1] hidden text-[#fff] min-h-[48px] w-full md:grid place-items-center connect-wallet cursor-pointer">
+          <Link href="/maps/create" passHref>
+            Create
+          </Link>
+        </div>
+      )}
     </>
   );
 };
