@@ -224,7 +224,7 @@ const MapForm = ({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Map Name</FormLabel>
+                    <FormLabel>Map Name*</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -242,7 +242,7 @@ const MapForm = ({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Map Description</FormLabel>
+                    <FormLabel>Map Description*</FormLabel>
                     <FormControl>
                       <Textarea {...field} />
                     </FormControl>
@@ -262,7 +262,7 @@ const MapForm = ({
                     name="creator_bio"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Creator Bio</FormLabel>
+                        <FormLabel>Creator Bio*</FormLabel>
                         <FormControl>
                           <Textarea {...field} />
                         </FormControl>
@@ -286,12 +286,16 @@ const MapForm = ({
 
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline">
-                    {emojiValue ? (
-                      <img src={emojiValue} className="w-6 h-6 mr-4" />
-                    ) : null}
-                    Map Emoji
-                  </Button>
+                  <div>
+                    <FormLabel className="mb-4 block">Map Emoji</FormLabel>
+
+                    <Button type="button" variant="outline">
+                      {emojiValue ? (
+                        <img src={emojiValue} className="w-6 h-6 mr-4" />
+                      ) : null}
+                      Select Emoji
+                    </Button>
+                  </div>
                 </PopoverTrigger>
                 <PopoverContent className="w-full">
                   <EmojiPicker

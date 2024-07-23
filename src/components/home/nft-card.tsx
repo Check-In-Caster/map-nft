@@ -487,7 +487,7 @@ const NFTCard = ({
 
         <div className={hideCard ? "" : "h-full flex flex-col"}>
           {hideCard ? null : (
-            <DialogTrigger asChild className="h-full">
+            <Link href={`/maps/${slug}`} passHref className="h-full">
               <div>
                 <Card
                   className={className}
@@ -498,7 +498,7 @@ const NFTCard = ({
                   creator={creator}
                 />
               </div>
-            </DialogTrigger>
+            </Link>
           )}
 
           {hide_mint_btn && hide_view_btn ? null : (
@@ -574,8 +574,13 @@ const Card = ({
           </div>
         )}
       </div>
-      <div className="text-xl line-clamp-2 mt-3">{title}</div>
-      <div className="flex gap-2 items-center mt-2">
+      {/* truncate text-ellipsis overflow-hidden */}
+      <div className="text-xl line-clamp-2 mt-3 ">{title}</div>
+      <Link
+        href={`/my-maps/${creator.wallet}`}
+        passHref
+        className="flex gap-2 items-center mt-2"
+      >
         <Image
           src={creator.farcaster?.imgUrl ?? "https://i.imgur.com/yZOyUGG.png"}
           alt={creator.farcaster?.name ?? ""}
@@ -586,7 +591,7 @@ const Card = ({
         <span className="text-sm">
           {creator.farcaster?.name ?? shortenAddress(creator.wallet)}
         </span>
-      </div>
+      </Link>
     </div>
   );
 };

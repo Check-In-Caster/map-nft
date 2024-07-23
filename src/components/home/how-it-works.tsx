@@ -33,10 +33,10 @@ const HowItWorks = () => {
           <p className="text-xl line-clamp-2 mt-3">3. Share and Earn</p>
         </div>
       </div>
-      <div className="text-center mt-10">
+      <div className="grid place-items-center text-center mt-10">
         <Link
           href="/maps/create"
-          className="bg-[#0067D9] text-white mt-7 text-lg px-6 py-2 tracking-wider"
+          className="inline bg-[#0067D9] text-white mt-7 text-lg px-6 py-2 tracking-wider"
         >
           Create your maps
         </Link>

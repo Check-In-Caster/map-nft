@@ -39,7 +39,7 @@ const PlaceCard = ({
         <div className="w-40">
           <img src={image} alt="place" className="rounded aspect-square w-40" />
         </div>
-        <div className="pl-6 relative flex flex-col">
+        <div className="pl-6 relative flex flex-col flex-1">
           <div className="text-xl">{name}</div>
           <div className="flex items-center font-normal">
             {rating}
@@ -54,7 +54,7 @@ const PlaceCard = ({
           <a
             href={propertyLink}
             target="_blank"
-            className="bg-white text-center border border-[#5844C1] mt-3 py-1.5"
+            className="bg-white text-center border border-[#5844C1] mt-3 py-1.5 w-full block"
           >
             Mint
           </a>
@@ -198,14 +198,14 @@ const MapDetailsPage = async ({
             />
           </div>
         </div>
-        <div className="flex gap-4 items-start">
+        <div className="flex flex-col md:flex-row gap-4 items-start">
           <LikeMap map_id={map.map_id} liked={liked ? true : false} />
 
           <ShareMap slug={map.slug} />
         </div>
       </section>
 
-      <section className="mt-8 flex gap-x-2">
+      <section className="mt-8 md:flex gap-x-2">
         <div className="flex-1 flex flex-col gap-y-5">
           {mapPlaces.map((place, i) => (
             <PlaceCard

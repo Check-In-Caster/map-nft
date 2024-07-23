@@ -111,7 +111,7 @@ const ImageUpload = (props: ImageUploadProps) => {
           />
 
           <a
-            className="mt-3 mb-1"
+            className="inline-block mb-1 bg-gray-100 border rounded-md px-3 py-1.5 mt-5"
             onClick={() => {
               props.handleUploadFile("");
               setImageFile("");

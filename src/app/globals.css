@@ -43,8 +43,13 @@ body {
 
 .connect-wallet button {
   color: #000 !important;
-  background: #faf3eb !important;
+  background: transparent !important;
+  font-family: inherit !important;
   box-shadow: none !important;
+}
+
+.connect-wallet button:hover {
+  transform: none !important
 }
 
 .connect-wallet button div {
