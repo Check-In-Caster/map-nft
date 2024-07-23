@@ -152,10 +152,9 @@ const MintTransaction = ({
                   />
                 </a>
                 <a
-                  href={`https://warpcast.com/~/compose?embeds[]=${shareUrl.replace(
-                    "?property=",
-                    "frame?property="
-                  )}&text=${encodeURI(shareText)}`}
+                  href={`https://warpcast.com/~/compose?embeds[]=${shareUrl}&text=${encodeURI(
+                    shareText
+                  )}`}
                   target="_blank"
                   className="w-14 cursor-pointer h-14 flex justify-center items-center bg-[#855DCD] rounded-full"
                 >
@@ -181,12 +180,6 @@ const MintTransaction = ({
             creator={creator}
           />
         </div>
-        <p className="text-xs mt-3 block text-gray-500">
-          Note: Each Property NFT will only contain the address,
-          lattitude/longitude, country and property score of the Property. Names
-          and photos on checkin.gg are fetched from Google Maps and for display
-          purposes only.
-        </p>
 
         {hash ? (
           <p className="text-center my-5 text-neutral-500 font-bold">
@@ -386,7 +379,7 @@ const NFTCard = ({
   const shareText = `Just minted ${title} on CheckIn!`;
 
   return (
-    <div className="max-w-[320px] min-w-[250px] h-full w-full mx-auto">
+    <div className="max-w-[320px] min-w-[250px] h-full">
       <Dialog defaultOpen={defaultOpen}>
         <DialogContent
           className="max-w-[600px] w-screen h-[100dvh] px-0 sm:px-6 z-40 max-h-[800px] bg-[#FFF8F0] overflow-y-scroll no-scrollbar"

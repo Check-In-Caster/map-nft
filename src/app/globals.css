@@ -42,8 +42,8 @@ body {
 }
 
 .connect-wallet button {
-  color: #000 !important;
-  background: transparent !important;
+  color: #fff !important;
+  background: #5844C1 !important;
   font-family: inherit !important;
   box-shadow: none !important;
 }
@@ -53,7 +53,8 @@ body {
 }
 
 .connect-wallet button div {
-   background: #fff8f0 !important;
+  color: #fff !important;
+   background: #5844C1 !important;
   border: 0 !important;
   box-shadow: none !important;
 }

@@ -54,7 +54,7 @@ const PlaceCard = ({
           <a
             href={propertyLink}
             target="_blank"
-            className="bg-white text-center border border-[#5844C1] mt-3 py-1.5 w-full block"
+            className="bg-white text-center border border-[#5844C1] mt-3 py-1.5 w-[160px] block"
           >
             Mint
           </a>

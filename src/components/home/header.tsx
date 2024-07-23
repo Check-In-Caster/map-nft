@@ -117,30 +117,37 @@ const Navigation = ({ mobileNav }: { mobileNav?: boolean }) => {
         mobile={mobileNav}
       />
       <NavLink
-        label="Property NFTs"
+        label="Place NFTs"
         href="https://property.checkin.gg/"
         external
         mobile={mobileNav}
       />
+      <NavLink
+        label="Litepaper"
+        href="https://checkin.gitbook.io/checkin-litepaper-v0.1"
+        external
+        mobile={mobileNav}
+      />
+
       {mobileNav && (
         <NavLink label="Create" href="/maps/create" mobile={mobileNav} />
       )}
 
       {!mobileNav && (
-        <div className="min-h-[48px] w-full grid place-items-center connect-wallet">
+        <div className="bg-[#0067D9] border-r border-gray-900 hidden text-[#fff] min-h-[48px] w-full md:grid place-items-center connect-wallet cursor-pointer">
+          <Link href="/maps/create" passHref>
+            Create
+          </Link>
+        </div>
+      )}
+
+      {!mobileNav && (
+        <div className="min-h-[48px] bg-[#5844C1] w-full grid place-items-center connect-wallet">
           <ConnectButton
             showBalance={false}
             accountStatus={"address"}
             chainStatus={"icon"}
           />
-        </div>
-      )}
-
-      {!mobileNav && (
-        <div className="bg-[#5844C1] hidden text-[#fff] min-h-[48px] w-full md:grid place-items-center connect-wallet cursor-pointer">
-          <Link href="/maps/create" passHref>
-            Create
-          </Link>
         </div>
       )}
     </>
