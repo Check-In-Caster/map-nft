@@ -207,8 +207,6 @@ const MapForm = ({
 
   const emojiValue = form.watch("emoji");
 
-  console.log(form.getValues());
-
   return (
     <div className="mt-8 w-full max-w-7xl mx-auto mb-8 p-4 md:p-0">
       <div className="text-center text-2xl md:text-4xl my-10">{heading}</div>
@@ -301,7 +299,6 @@ const MapForm = ({
                   <EmojiPicker
                     emojiStyle={EmojiStyle.TWITTER}
                     onEmojiClick={(e) => {
-                      console.log(e.imageUrl);
                       form.setValue("emoji", e.imageUrl);
                     }}
                   />

@@ -3,6 +3,7 @@
 import { createNewToken } from "@/lib/deployToken";
 import { prisma } from "@/lib/prisma";
 import "@ethersproject/shims";
+import { ethers } from "ethers";
 
 export default async function updateMintRecords({
   wallet_address,
@@ -69,8 +70,10 @@ export async function deployToken(property_id: string, type?: string) {
     return Number(propertyInfo.token_id);
   }
 
+  const maxInt256 = ethers.constants.MaxUint256.div(2).sub(1);
+
   const tokenId = await createNewToken({
-    maxSupply: 0,
+    maxSupply: Number(maxInt256),
     mintLimit: 0,
     price: 0,
     tokenURI: "https://maps.checkin.gg/api/metadata/",

@@ -18,15 +18,6 @@ const getData = async (propertyId: string, secret: string) => {
     return redirect("/maintenance");
   }
 
-  // const defaultProperty = await prisma.propertyInfo.findFirst({
-  //   where: {
-  //     property_id: "d69f511d-46d0-4d18-a520-f40782d9f4fb",
-  //   },
-  //   include: {
-  //     Locations: true,
-  //   },
-  // });
-
   const trendingMaps = await prisma.maps.findMany({
     orderBy: {
       total_minted: "desc",
@@ -34,33 +25,7 @@ const getData = async (propertyId: string, secret: string) => {
     take: 4,
   });
 
-  // // [FIX] - cache these results.
-  // const owners = await prisma.propertySales.groupBy({
-  //   by: ["wallet_address"],
-  // });
-
-  // const properties = await prisma.propertySales.aggregate({
-  //   _sum: {
-  //     quantity: true,
-  //   },
-  // });
-
-  // const property = propertyId
-  //   ? await prisma.propertyInfo.findUnique({
-  //       include: {
-  //         Locations: true,
-  //       },
-  //       where: {
-  //         property_id: propertyId,
-  //       },
-  //     })
-  //   : null;
-
   return {
-    // owners: owners.length.toString(),
-    // properties: (properties?._sum?.quantity ?? 0).toString(),
-    // property: property,
-    // defaultProperty: defaultProperty,
     trendingMaps,
   };
 };
@@ -74,10 +39,6 @@ export default async function Home({
     searchParams.property,
     searchParams.secret
   );
-
-  // await getData(searchParams.property, searchParams.secret);
-
-  console.log(trendingMaps);
 
   return (
     <>

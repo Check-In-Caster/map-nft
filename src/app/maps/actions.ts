@@ -212,8 +212,6 @@ export const getUploadUrl = async ({
   const s3 = new AWS.S3();
 
   try {
-    console.log({ name, type });
-
     const fileParams = {
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: name,
