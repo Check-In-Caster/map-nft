@@ -8,8 +8,8 @@ import { Maps, MapsCollected, MapsLiked } from "@prisma/client";
 import Image from "next/image";
 import { useAccount } from "wagmi";
 
-type MapCollectedProps = { map: Partial<Maps> & MapsCollected };
-type MapLikedProps = { map: Partial<Maps> & MapsLiked };
+type MapCollectedProps = { map: Maps & MapsCollected };
+type MapLikedProps = { map: Maps & MapsLiked };
 
 const MyStats = ({
   profile,
