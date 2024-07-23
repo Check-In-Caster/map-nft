@@ -16,7 +16,7 @@ const getProperties = async (
 
   const maintenance_mode = settings?.value;
 
-  if (maintenance_mode === "true" && secret != "QWKGJTSV") {
+  if (maintenance_mode === "true" && secret != process.env.ACCESS_SECRET) {
     return redirect("/maintenance");
   }
 
@@ -37,7 +37,7 @@ const getProperties = async (
     });
   }
 
-  const mapsCreted = await prisma.mapsCollected.findMany({
+  const mapsCreated = await prisma.maps.findMany({
     where: { wallet_address: wallet_address },
     take: 50,
   });
@@ -63,7 +63,7 @@ const getProperties = async (
     maps: {
       collected: mapsCollected,
       liked: mapsLiked,
-      created: mapsCreted,
+      created: mapsCreated,
     },
     stats: {
       maps_created: mapsCreatedCount.toString(),
@@ -90,6 +90,8 @@ const Page = async ({
     profile?.profileTokenId ?? null,
     searchParams.secret
   );
+
+  console.log(profile);
 
   return (
     <MyStats

@@ -38,13 +38,12 @@ const Page = async ({
     return redirect("/");
   }
 
-  const mapToken = await getMapsToken();
-
   if (!map)
     return (
       <div className="mt-8 w-full max-w-7xl mx-auto mb-8">Map not found</div>
     );
 
+  const mapToken = await getMapsToken();
   return (
     <MapForm
       heading="Edit Map"

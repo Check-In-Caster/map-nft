@@ -14,7 +14,7 @@ const getData = async (propertyId: string, secret: string) => {
 
   const maintenance_mode = settings?.value;
 
-  if (maintenance_mode === "true" && secret != "QWKGJTSV") {
+  if (maintenance_mode === "true" && secret != process.env.ACCESS_SECRET) {
     return redirect("/maintenance");
   }
 

@@ -204,6 +204,7 @@ const NFTCard = ({
   referral = "",
   token_id,
   slug,
+  edit = false,
   className,
   buttonClassName,
   mintButtonText = "Mint",
@@ -223,6 +224,7 @@ const NFTCard = ({
   token_id?: number | undefined;
   slug: string;
   className?: string;
+  edit?: boolean;
   buttonClassName?: string;
   mintButtonText?: string;
   hide_mint_btn?: boolean;
@@ -497,12 +499,23 @@ const NFTCard = ({
           {hide_mint_btn && hide_view_btn ? null : (
             <div className="flex gap-2">
               {hide_view_btn ? null : (
-                <Link
-                  href={`/maps/${slug}`}
-                  className={`border text-center border-[#5844C1] py-2 mt-5 w-full disabled:opacity-50 bg-[#fff] text-[#5844C1]`}
-                >
-                  View
-                </Link>
+                <>
+                  {edit ? (
+                    <Link
+                      href={`/maps/edit/${property_id}`}
+                      className={`border text-center border-[#5844C1] py-2 mt-5 w-full disabled:opacity-50 bg-[#fff] text-[#5844C1]`}
+                    >
+                      Edit
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/maps/${slug}`}
+                      className={`border text-center border-[#5844C1] py-2 mt-5 w-full disabled:opacity-50 bg-[#fff] text-[#5844C1]`}
+                    >
+                      View
+                    </Link>
+                  )}
+                </>
               )}
               {hide_mint_btn ? null : (
                 <DialogTrigger asChild>

@@ -8,6 +8,9 @@ import { Maps, MapsCollected, MapsLiked } from "@prisma/client";
 import Image from "next/image";
 import { useAccount } from "wagmi";
 
+type MapCollectedProps = { map: Partial<Maps> & MapsCollected };
+type MapLikedProps = { map: Partial<Maps> & MapsLiked };
+
 const MyStats = ({
   profile,
   stats,
@@ -17,10 +20,10 @@ const MyStats = ({
 }: {
   checkInCount?: number;
 
-  maps?: {
+  maps: {
     created: Maps[];
-    liked: { map: Maps & MapsCollected }[];
-    collected: { map: Maps & MapsLiked }[];
+    liked: MapLikedProps[];
+    collected: MapCollectedProps[];
   };
 
   profile?: {
@@ -107,6 +110,7 @@ const MyStats = ({
                   creator={{
                     wallet: map.wallet_address,
                   }}
+                  edit
                 />
               );
             })}

@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogTrigger } from "./dialog";
 const ShareRefLink = ({ wallet_address }: { wallet_address: string }) => {
   const account = useAccount();
   const shareUrl = `https://maps.checkin.gg/my-maps/${wallet_address}?ref=${account?.address}`;
-  const portfolioFrameUrl = `https://maps.checkin.gg/my-maps?wallet_address=${wallet_address}`;
+  const portfolioFrameUrl = `https://maps.checkin.gg/my-maps/${wallet_address}?ref=${account?.address}`;
   const shareText =
     "Check out the onchain properties I own in my portfolio - create yours too!";
 
