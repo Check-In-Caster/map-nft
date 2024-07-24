@@ -98,7 +98,7 @@ const formSchema = z.object({
   description: z
     .string()
     .min(3, { message: "Description must have at least 3 characters" }),
-  emoji: z.string(),
+  emoji: z.string().min(1, { message: "Please select an emoji" }),
   places: z
     .array(
       z.object({
@@ -271,7 +271,7 @@ const MapForm = ({
               )}
 
               <div>
-                <FormLabel className="mb-4 block">Thumbnail</FormLabel>
+                <FormLabel className="mb-4 block">Thumbnail*</FormLabel>
                 <ImageUpload
                   path="checkin-maps"
                   label="Thumbnail"
@@ -285,7 +285,7 @@ const MapForm = ({
               <Popover>
                 <PopoverTrigger asChild>
                   <div>
-                    <FormLabel className="mb-4 block">Map Emoji</FormLabel>
+                    <FormLabel className="mb-4 block">Map Emoji*</FormLabel>
 
                     <Button type="button" variant="outline">
                       {emojiValue ? (

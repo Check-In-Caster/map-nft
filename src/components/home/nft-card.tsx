@@ -23,7 +23,6 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import { toast } from "sonner";
 import { useAccount, useWriteContract } from "wagmi";
 import CostBreakdown from "../ui/cost-breakdown";
-import Heading from "../ui/heading";
 import Quantity from "../ui/quanitity";
 
 function capitalizeFirstLetter(string: string) {
@@ -108,12 +107,14 @@ const MintTransaction = ({
 
         {!pending && !failed ? (
           <>
-            <Heading className="my-2">
-              <p className="text-center">
-                Minted <br />
-                <div className="text-l font-normal">{title}! 🎉</div>
-              </p>
-            </Heading>
+            <div className="my-2 text-center grid place-items-center">
+              <>
+                <p className="text-center text-black relative text-xl md:text-3xl font-bold px-8 py-3 w-[315px] h-20 grid place-content-center rounded-[50%] ">
+                  Minted <br />
+                </p>
+                <p className="text-2xl font-normal">{title}! 🎉</p>
+              </>
+            </div>
 
             <div className="my-0">
               <p className="mt-8 font-bold text-[#000] text-xl text-center">

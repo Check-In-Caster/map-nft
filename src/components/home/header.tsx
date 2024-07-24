@@ -134,7 +134,7 @@ const Navigation = ({ mobileNav }: { mobileNav?: boolean }) => {
       )}
 
       {!mobileNav && (
-        <div className="bg-[#0067D9] border-r border-gray-900 hidden text-[#fff] min-h-[48px] w-full md:grid place-items-center connect-wallet cursor-pointer">
+        <div className="bg-[#EF9854] border-r border-gray-900 hidden text-[#000] min-h-[48px] w-full md:grid place-items-center connect-wallet cursor-pointer">
           <Link href="/maps/create" passHref>
             Create your maps
           </Link>

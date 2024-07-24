@@ -15,7 +15,7 @@ const HeroSection: React.FC = () => {
             </h1>
             <Link
               href="/maps/create"
-              className="bg-[#0067D9] text-white mt-7 text-lg px-6 py-2 tracking-wider"
+              className="bg-[#EF9854] text-[#000] mt-7 text-lg px-6 py-2 tracking-wider"
             >
               Create your maps
             </Link>

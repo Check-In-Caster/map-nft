@@ -16,7 +16,12 @@ const getMapDetails = async (id: string) => {
     },
   });
 
-  if (map?.wallet_address !== session?.user?.name?.toLocaleLowerCase()) {
+  console.log(map);
+
+  if (
+    map?.wallet_address.toLocaleLowerCase() !=
+    session?.user?.name?.toLocaleLowerCase()
+  ) {
     return null;
   }
 

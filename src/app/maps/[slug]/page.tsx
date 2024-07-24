@@ -7,6 +7,7 @@ import { shortenAddress } from "@/lib/utils";
 import { Lexend } from "next/font/google";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import EditMapButton from "./EditMapButton";
 import LikeMap from "./LikeMap";
 import ShareMap from "./ShareMap";
 
@@ -56,7 +57,7 @@ const PlaceCard = ({
             target="_blank"
             className="bg-white text-center border border-[#5844C1] mt-3 py-1.5 w-[160px] block"
           >
-            Mint
+            Mint Place
           </a>
         </div>
       </div>
@@ -173,7 +174,7 @@ const MapDetailsPage = async ({
 
           <div className="mt-5 font-normal">{creator?.creator_bio}</div>
 
-          <div>
+          <div className="flex items-center space-x-5">
             <NFTCard
               key={map.map_id}
               property_id={map.map_id!}
@@ -194,7 +195,12 @@ const MapDetailsPage = async ({
               hideCard
               hide_view_btn
               buttonClassName="bg-[#5844C1] text-white mt-3 px-10 py-2 text-lg"
-              mintButtonText="Mint to Support"
+              mintButtonText="Mint Map"
+            />
+
+            <EditMapButton
+              map_id={map.map_id}
+              wallet_address={map.wallet_address}
             />
           </div>
         </div>
