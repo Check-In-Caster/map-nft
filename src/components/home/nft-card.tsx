@@ -536,7 +536,7 @@ const Card = ({
   return (
     <div className={`h-full flex flex-col relative p-2 ${className}`}>
       <div className="w-full">
-        {imgUrl ? (
+        {imgUrl && !emoji ? (
           <Image
             src={imgUrl}
             alt={title}
@@ -544,9 +544,27 @@ const Card = ({
             width={320}
             className="w-80 object-cover aspect-square"
           />
+        ) : imgUrl ? (
+          <div className="relative w-full h-full">
+            <Image
+              src={imgUrl}
+              alt={title}
+              height={320}
+              width={320}
+              className="w-80 object-cover aspect-square"
+            />
+            <div className="absolute inset-0 bg-[#00000050] flex items-center justify-center text-white">
+              <div className="text-center relative text-lg mt-5">
+                <div className="absolute text-6xl -top-16 left-1/2 -translate-x-1/2">
+                  <img src={emoji} alt="" />
+                </div>
+                <div className="text-3xl">{title}</div>
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="bg-white w-full aspect-square text-center flex flex-col justify-center">
-            <div className="text-center relative text-lg">
+            <div className="text-center relative text-lg mt-5">
               <div className="absolute text-6xl -top-16 left-1/2 -translate-x-1/2">
                 <img src={emoji} alt="" />
               </div>

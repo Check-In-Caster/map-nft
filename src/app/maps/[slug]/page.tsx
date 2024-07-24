@@ -176,7 +176,11 @@ const MapDetailsPage = async ({
             </span>
           </div>
 
-          <div className="mt-2 font-normal">{creator?.creator_bio}</div>
+          <div
+            className={`${lexend.className} mt-2 font-light tracking-normal`}
+          >
+            {creator?.creator_bio}
+          </div>
 
           <div className="flex items-center space-x-5">
             <NFTCard
