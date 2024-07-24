@@ -18,6 +18,7 @@ const lexend = Lexend({
 const PlaceCard = ({
   property_id,
   name,
+  map_url,
   image,
   rating,
   category,
@@ -26,6 +27,7 @@ const PlaceCard = ({
 }: {
   property_id: string;
   name: string;
+  map_url: string;
   image: string;
   rating: number;
   category: string;
@@ -41,7 +43,9 @@ const PlaceCard = ({
           <img src={image} alt="place" className="rounded aspect-square w-40" />
         </div>
         <div className="pl-6 relative flex flex-col flex-1">
-          <div className="text-xl">{name}</div>
+          <a href={map_url} target="_BLANK" className="text-xl">
+            {name}
+          </a>
           <div className="flex items-center font-normal">
             {rating}
             <img
@@ -172,7 +176,7 @@ const MapDetailsPage = async ({
             </span>
           </div>
 
-          <div className="mt-4 font-normal">{creator?.creator_bio}</div>
+          <div className="mt-2 font-normal">{creator?.creator_bio}</div>
 
           <div className="flex items-center space-x-5">
             <NFTCard
@@ -224,6 +228,7 @@ const MapDetailsPage = async ({
               rating={place.Locations?.rating ?? 0}
               category={place.Locations?.category ?? ""}
               wallet_address={map.wallet_address}
+              map_url={place?.Locations?.map_url ?? ""}
               placeDescription={map?.MapsPlaces[i].description}
             />
           ))}

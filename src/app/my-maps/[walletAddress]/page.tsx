@@ -91,8 +91,6 @@ const Page = async ({
     searchParams.secret
   );
 
-  console.log(profile);
-
   return (
     <MyStats
       profile={profile}

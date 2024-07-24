@@ -1,3 +1,4 @@
+import { getFarcasterAccount } from "@/lib/airstack";
 import { prisma } from "@/lib/prisma";
 import { shortenAddress } from "@/lib/utils";
 import { ImageResponse } from "@vercel/og";
@@ -20,6 +21,11 @@ export async function GET(
   if (!map) {
     return new Response("Not found", { status: 404 });
   }
+
+  const farcasterProfile =
+    map.wallet_address != ""
+      ? await getFarcasterAccount(map?.wallet_address)
+      : null;
 
   const imageResponse = new ImageResponse(
     (
@@ -63,10 +69,16 @@ export async function GET(
             style={{ color: "#fff", paddingBottom: "20px" }}
           >
             <img
-              src="https://i.imgur.com/yZOyUGG.png"
+              src={
+                farcasterProfile?.profileImage ??
+                "https://i.imgur.com/yZOyUGG.png"
+              }
               tw="w-[56px] h-[56px] rounded-full"
             />
-            <span tw="ml-5">{shortenAddress(map.wallet_address)}</span>
+            <span tw="ml-5">
+              {farcasterProfile?.profileName ??
+                shortenAddress(map?.wallet_address ?? "")}
+            </span>
           </div>
         </div>
       </div>

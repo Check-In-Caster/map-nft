@@ -293,8 +293,6 @@ const NFTCard = ({
       }
     }
 
-    console.log("tokenId:", tokenId);
-
     if (tokenId == null) {
       // may be redirect to the mint page again.
       router.push(`/?property=${property_id}`);
@@ -308,9 +306,6 @@ const NFTCard = ({
         toast("Please connect to the correct network. Chain ID: " + CHAIN_ID);
         return;
       }
-      console.log(String(count * (0.000777 + price)));
-
-      console.log(BigInt(`${count * (0.000777 + price) * 1000000}`));
 
       const priceInWei = ethers.utils.parseUnits(price.toString(), "ether");
       const multiplier = ethers.utils.parseUnits("0.000777", "ether");
@@ -338,18 +333,6 @@ const NFTCard = ({
         value: totalValueInBigInt,
       });
 
-      console.log(_mint);
-
-      // const _mint = await contract.mintWithRewards(
-      //   baseZoraMinterContractAddress,
-      //   tokenId,
-      //   count,
-      //   ethers.utils.defaultAbiCoder.encode(["address"], [account.address!]),
-      //   refAddress == "" ? REF_WALLET_ADDRESS : refAddress,
-      //   {
-      //     value: ethers.utils.parseEther(String(count * (0.000777 + price))),
-      //   }
-      // );
       console.log(_mint);
 
       setHash(`${_mint}`);
@@ -428,16 +411,6 @@ const NFTCard = ({
                 <Quantity count={count} setCount={setCount} />
               </div>
               <div className="w-[280px] md:w-[400px] mt-0">
-                {/* <select
-                  className="bg-transparent border-2 border-neutral-200 focus:border-neutral-200 text-gray-900 text-sm rounded-md block w-full p-2.5 pr-3 mb-8"
-                  value={crypto}
-                  onChange={(e) => {
-                    setCrypto(e.target.value);
-                  }}
-                >
-                  <option value="$ETH">ETH</option>
-                  <option value="$DEGEN">$DEGEN</option>
-                </select> */}
                 <CostBreakdown count={count} price={price} />
 
                 <div className="text-center mt-10">
@@ -465,6 +438,7 @@ const NFTCard = ({
                   )}
                 </div>
               </div>
+              <p className="mt-3 text-gray-500 text-sm">0 Minted</p>
             </div>
           )}
           {minted && (

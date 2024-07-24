@@ -8,7 +8,7 @@ const LikeMap = ({ map_id, liked }: { map_id: string; liked?: boolean }) => {
     const response = await markFavorite({
       map_id: map_id,
     });
-    console.log(response);
+
     if (response.status === "success") {
       toast.success(response.message);
     }
