@@ -1,7 +1,11 @@
-import { Maps } from "@prisma/client";
+import { Maps, MapsCreator } from "@prisma/client";
 import NFTCard from "./nft-card";
 
-const TrendingMaps = ({ maps }: { maps: Maps[] }) => {
+const TrendingMaps = ({
+  maps,
+}: {
+  maps: ({ MapsCreator: MapsCreator } & Maps)[];
+}) => {
   return (
     <div>
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
@@ -14,9 +18,14 @@ const TrendingMaps = ({ maps }: { maps: Maps[] }) => {
               title={map.name}
               slug={map.slug}
               imgUrl={map.thumbnail ?? undefined}
+              userMinted={Number(map.total_minted ?? 0)}
               emoji={map.map_emoji ?? undefined}
               creator={{
                 wallet: map.wallet_address,
+                farcaster: {
+                  imgUrl: map.MapsCreator?.profile_image ?? undefined,
+                  name: map.MapsCreator?.name ?? undefined,
+                },
               }}
             />
           );

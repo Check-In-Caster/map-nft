@@ -1,5 +1,6 @@
 "use server";
 
+import { getFarcasterAccount } from "@/lib/airstack";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 const AWS = require("aws-sdk");
@@ -142,6 +143,11 @@ export async function updateMap({
       },
     });
 
+    const farcasterProfile =
+      map.wallet_address != ""
+        ? await getFarcasterAccount(map?.wallet_address)
+        : null;
+
     await prisma.mapsCreator.upsert({
       where: {
         wallet_address: wallet_address,
@@ -149,9 +155,13 @@ export async function updateMap({
       create: {
         creator_bio: creator_bio,
         wallet_address: wallet_address,
+        name: farcasterProfile?.profileName ?? "",
+        profile_image: farcasterProfile?.profileImage ?? "",
       },
       update: {
         creator_bio: creator_bio,
+        name: farcasterProfile?.profileName ?? "",
+        profile_image: farcasterProfile?.profileImage ?? "",
       },
     });
 

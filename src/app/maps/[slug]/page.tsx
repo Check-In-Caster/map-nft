@@ -1,7 +1,6 @@
 import { getMapsToken } from "@/components/home/actions";
 import AppleMap from "@/components/home/map";
 import NFTCard from "@/components/home/nft-card";
-import { getFarcasterAccount } from "@/lib/airstack";
 import { prisma } from "@/lib/prisma";
 import { shortenAddress } from "@/lib/utils";
 import { Lexend } from "next/font/google";
@@ -59,7 +58,7 @@ const PlaceCard = ({
           <a
             href={propertyLink}
             target="_blank"
-            className="bg-white text-center border border-[#5844C1] mt-3 py-1.5 w-[160px] block"
+            className="bg-white text-center border border-[#5844C1] mt-auto py-1.5 w-[160px] block"
           >
             Mint Place
           </a>
@@ -86,6 +85,7 @@ const MapDetailsPage = async ({
     },
     include: {
       MapsPlaces: true,
+      MapsCreator: true,
     },
   });
 
@@ -93,11 +93,7 @@ const MapDetailsPage = async ({
     notFound();
   }
 
-  const creator = await prisma.mapsCreator.findFirst({
-    where: {
-      wallet_address: map.wallet_address,
-    },
-  });
+  const creator = map.MapsCreator;
 
   const liked = await prisma.mapsLiked.findFirst({
     where: {
@@ -143,11 +139,6 @@ const MapDetailsPage = async ({
     };
   });
 
-  const farcasterProfile =
-    map.wallet_address != ""
-      ? await getFarcasterAccount(map?.wallet_address)
-      : null;
-
   return (
     <div className="mt-8 max-w-7xl mx-auto mb-8 p-2 md:p-0">
       <section className="flex justify-between">
@@ -161,18 +152,14 @@ const MapDetailsPage = async ({
 
           <div className="flex gap-2 items-center mt-6">
             <Image
-              src={
-                farcasterProfile?.profileImage ??
-                "https://i.imgur.com/yZOyUGG.png"
-              }
-              alt={farcasterProfile?.profileName ?? ""}
+              src={creator?.profile_image ?? "https://i.imgur.com/yZOyUGG.png"}
+              alt={creator?.name ?? ""}
               height={28}
               width={28}
               className="rounded-full h-7 w-7 object-cover"
             />
             <span className="text-sm">
-              {farcasterProfile?.profileName ??
-                shortenAddress(map?.wallet_address ?? "")}
+              {creator.name ?? shortenAddress(map?.wallet_address ?? "")}
             </span>
           </div>
 
@@ -185,6 +172,7 @@ const MapDetailsPage = async ({
           <div className="flex items-center space-x-5">
             <NFTCard
               key={map.map_id}
+              userMinted={Number(map.total_minted ?? 0)}
               property_id={map.map_id!}
               token_id={map.token_id ? Number(map.token_id) : undefined}
               title={map.name}
@@ -195,9 +183,8 @@ const MapDetailsPage = async ({
                 wallet: map.wallet_address,
                 farcaster: {
                   imgUrl:
-                    farcasterProfile?.profileImage ??
-                    "https://i.imgur.com/yZOyUGG.png",
-                  name: farcasterProfile?.profileName,
+                    creator?.profile_image ?? "https://i.imgur.com/yZOyUGG.png",
+                  name: creator?.name ?? "",
                 },
               }}
               hideCard

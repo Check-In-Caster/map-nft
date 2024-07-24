@@ -45,8 +45,8 @@ const MintTransaction = ({
   creator: {
     wallet: string;
     farcaster?: {
-      name: string;
-      imgUrl: string;
+      name?: string;
+      imgUrl?: string;
     };
   };
   hash?: string;
@@ -237,8 +237,8 @@ const NFTCard = ({
   creator: {
     wallet: string;
     farcaster?: {
-      name: string;
-      imgUrl: string;
+      name?: string;
+      imgUrl?: string;
     };
   };
   hideCard?: boolean;
@@ -438,7 +438,7 @@ const NFTCard = ({
                   )}
                 </div>
               </div>
-              <p className="mt-3 text-gray-500 text-sm">0 Minted</p>
+              <p className="mt-3 text-gray-500 text-sm">{userMinted} Minted</p>
             </div>
           )}
           {minted && (
@@ -528,69 +528,54 @@ const Card = ({
   creator: {
     wallet: string;
     farcaster?: {
-      name: string;
-      imgUrl: string;
+      name?: string;
+      imgUrl?: string;
     };
   };
 }) => {
   return (
-    <div className={`h-full flex flex-col relative p-2 ${className}`}>
-      <div className="w-full">
-        {imgUrl && !emoji ? (
-          <Image
-            src={imgUrl}
-            alt={title}
-            height={320}
-            width={320}
-            className="w-80 object-cover aspect-square"
-          />
-        ) : imgUrl ? (
-          <div className="relative w-full h-full">
-            <Image
-              src={imgUrl}
-              alt={title}
-              height={320}
-              width={320}
-              className="w-80 object-cover aspect-square"
-            />
-            <div className="absolute inset-0 bg-[#00000050] flex items-center justify-center text-white">
-              <div className="text-center relative text-lg mt-5">
-                <div className="absolute text-6xl -top-16 left-1/2 -translate-x-1/2">
-                  <img src={emoji} alt="" />
-                </div>
-                <div className="text-3xl">{title}</div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white w-full aspect-square text-center flex flex-col justify-center">
+    <div
+      className={`h-full flex flex-col relative ${className}`}
+      style={{
+        backgroundImage: `url(${imgUrl})`,
+        backgroundSize: "cover",
+      }}
+    >
+      <div
+        className="h-full w-full text-white p-3"
+        style={{
+          background: "rgba(0, 0, 0, 0.75)",
+        }}
+      >
+        <div className="w-full ">
+          <div className="w-full aspect-square text-center flex flex-col justify-center">
             <div className="text-center relative text-lg mt-5">
               <div className="absolute text-6xl -top-16 left-1/2 -translate-x-1/2">
                 <img src={emoji} alt="" />
               </div>
-              <div className="text-3xl">{title}</div>
+              <div className="text-2xl mt-8">{title}</div>
             </div>
           </div>
-        )}
+        </div>
+        {/* truncate text-ellipsis overflow-hidden */}
+
+        <Link
+          href={`/my-maps/${creator.wallet}`}
+          passHref
+          className="flex gap-2 items-center mt-2"
+        >
+          <Image
+            src={creator.farcaster?.imgUrl ?? "https://i.imgur.com/yZOyUGG.png"}
+            alt={creator.farcaster?.name ?? ""}
+            height={28}
+            width={28}
+            className="rounded-full h-7 w-7 object-cover"
+          />
+          <span className="text-sm">
+            {creator.farcaster?.name ?? shortenAddress(creator.wallet)}
+          </span>
+        </Link>
       </div>
-      {/* truncate text-ellipsis overflow-hidden */}
-      <div className="text-xl line-clamp-2 mt-3 ">{title}</div>
-      <Link
-        href={`/my-maps/${creator.wallet}`}
-        passHref
-        className="flex gap-2 items-center mt-2"
-      >
-        <Image
-          src={creator.farcaster?.imgUrl ?? "https://i.imgur.com/yZOyUGG.png"}
-          alt={creator.farcaster?.name ?? ""}
-          height={28}
-          width={28}
-          className="rounded-full h-7 w-7 object-cover"
-        />
-        <span className="text-sm">
-          {creator.farcaster?.name ?? shortenAddress(creator.wallet)}
-        </span>
-      </Link>
     </div>
   );
 };

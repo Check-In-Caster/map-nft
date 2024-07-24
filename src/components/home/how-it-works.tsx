@@ -6,7 +6,7 @@ const HowItWorks = () => {
   return (
     <>
       <div className="mt-8 max-w-7xl mx-auto mb-8 p-2 md:p-0 relative">
-        <div className="z-50 h-full w-full relative pt-2 pb-10">
+        <div className="z-10 h-full w-full relative pt-2 pb-10">
           <div className="text-center">
             <Heading label="How it works for MAP creators" />
           </div>

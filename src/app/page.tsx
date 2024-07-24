@@ -22,6 +22,9 @@ const getData = async (propertyId: string, secret: string) => {
     orderBy: {
       total_minted: "desc",
     },
+    include: {
+      MapsCreator: true,
+    },
     take: 4,
   });
 
@@ -32,9 +35,12 @@ const getData = async (propertyId: string, secret: string) => {
           "557b7107-f020-493b-9c01-483b49876bcf",
           "5cca9abb-5d94-471c-8277-55b3cab5f72b",
           "80f8ee6e-1645-4557-85a9-97bc36a073b5",
-          "e81e0951-099e-47b2-b224-19e9f0e48280",
+          "91ddd21c-96b5-412f-ba85-8872b1f4ce12",
         ],
       },
+    },
+    include: {
+      MapsCreator: true,
     },
     orderBy: {
       total_minted: "desc",
@@ -58,6 +64,9 @@ export default async function Home({
     searchParams.secret
   );
 
+  console.log("trendingMaps");
+  console.log(trendingMaps);
+
   return (
     <>
       <HeroSection />
@@ -77,6 +86,7 @@ export default async function Home({
             return (
               <NFTCard
                 key={map.map_id}
+                userMinted={Number(map.total_minted ?? 0)}
                 property_id={map.map_id!}
                 token_id={map.token_id ? Number(map.token_id) : undefined}
                 title={map.name}
@@ -85,6 +95,10 @@ export default async function Home({
                 emoji={map.map_emoji ?? undefined}
                 creator={{
                   wallet: map.wallet_address,
+                  farcaster: {
+                    imgUrl: map.MapsCreator?.profile_image ?? undefined,
+                    name: map.MapsCreator?.name ?? undefined,
+                  },
                 }}
               />
             );

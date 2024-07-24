@@ -48,6 +48,7 @@ model Bookmarks {
   fid             String
   check_in_ref_id String    @db.Uuid
   created_at      DateTime? @default(now()) @db.Timestamp(6)
+  user_id         String?   @db.Uuid
   Checkin         Checkin   @relation(fields: [check_in_ref_id], references: [checkin_id])
 }
 
@@ -66,6 +67,7 @@ model Checkin {
   coordinates Json?
   location_id String?     @db.Uuid
   distance    Decimal?
+  user_id     String?     @db.Uuid
   Bookmarks   Bookmarks[]
   User        User        @relation(fields: [fid], references: [fid])
   Locations   Locations?  @relation(fields: [location_id], references: [location_id])
@@ -102,6 +104,7 @@ model Locations {
   latitude     Decimal?       @db.Decimal
   longitude    Decimal?       @db.Decimal
   address      String?
+  updated_at   DateTime?      @default(now()) @db.Timestamptz(6)
   Checkin      Checkin[]
   PropertyInfo PropertyInfo[]
 }
@@ -121,6 +124,7 @@ model PointsLog {
   created_at DateTime @default(now())
   checkin_id String?  @db.Uuid
   revert     Boolean? @default(false)
+  user_id    String?  @db.Uuid
   Checkin    Checkin? @relation(fields: [checkin_id], references: [checkin_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
@@ -131,6 +135,7 @@ model ReferralCode {
   used_by    String?
   joined_at  DateTime?
   created_at DateTime  @default(now())
+  user_id    String?   @db.Uuid
   User       User?     @relation(fields: [used_by], references: [fid])
 }
 
@@ -187,7 +192,7 @@ model PropertyInfo {
   token_id      Int?
   total_minted  Decimal?        @default(0) @db.Decimal
   reviews       Decimal?        @db.Decimal
-  type          String?         @db.VarChar(100)
+  type          String?
   Locations     Locations?      @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_propertyinfo_locations")
   PropertySales PropertySales[]
 }
@@ -222,6 +227,10 @@ model Airdrop {
   season          String? @default("0")
   farcon_points   String?
   dpad_stake      String?
+  first_property  String?
+  second_property String?
+  special         Int?    @default(0)
+  total_amount    String?
 }
 
 model AirdropProperty {
@@ -259,6 +268,7 @@ model Maps {
   total_minted   Decimal?        @default(0) @db.Decimal
   token_gated    Boolean?        @default(false)
   eth_amount     String?
+  MapsCreator    MapsCreator     @relation(fields: [wallet_address], references: [wallet_address], onDelete: NoAction, onUpdate: NoAction)
   MapsCollected  MapsCollected[]
   MapsLiked      MapsLiked[]
   MapsPlaces     MapsPlaces[]
@@ -296,4 +306,7 @@ model MapsCollected {
 model MapsCreator {
   wallet_address String  @id
   creator_bio    String?
+  name           String?
+  profile_image  String?
+  Maps           Maps[]
 }
