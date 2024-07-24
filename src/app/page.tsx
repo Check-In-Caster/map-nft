@@ -25,8 +25,26 @@ const getData = async (propertyId: string, secret: string) => {
     take: 4,
   });
 
+  const featuredMaps = await prisma.maps.findMany({
+    where: {
+      map_id: {
+        in: [
+          "557b7107-f020-493b-9c01-483b49876bcf",
+          "5cca9abb-5d94-471c-8277-55b3cab5f72b",
+          "80f8ee6e-1645-4557-85a9-97bc36a073b5",
+          "e81e0951-099e-47b2-b224-19e9f0e48280",
+        ],
+      },
+    },
+    orderBy: {
+      total_minted: "desc",
+    },
+    take: 4,
+  });
+
   return {
     trendingMaps,
+    featuredMaps,
   };
 };
 
@@ -35,7 +53,7 @@ export default async function Home({
 }: {
   searchParams: Record<string, string>;
 }) {
-  const { trendingMaps } = await getData(
+  const { trendingMaps, featuredMaps } = await getData(
     searchParams.property,
     searchParams.secret
   );
@@ -74,7 +92,7 @@ export default async function Home({
         </div>
 
         <Heading label="Tokyo Maps" />
-        <TrendingMaps />
+        <TrendingMaps maps={featuredMaps} />
       </div>
     </>
   );
