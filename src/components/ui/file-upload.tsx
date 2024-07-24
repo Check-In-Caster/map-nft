@@ -105,7 +105,7 @@ const ImageUpload = (props: ImageUploadProps) => {
           <img
             width={160}
             height={160}
-            className="w-[160px] h-[160px] mt-2 rounded-md"
+            className="w-[160px] h-[160px] mt-2 rounded-md object-cover"
             src={`${imageFile}`}
             alt=""
           />

@@ -155,7 +155,7 @@ const MapDetailsPage = async ({
             {map?.description}
           </h2>
 
-          <div className="flex gap-2 items-center mt-3">
+          <div className="flex gap-2 items-center mt-6">
             <Image
               src={
                 farcasterProfile?.profileImage ??
@@ -172,7 +172,7 @@ const MapDetailsPage = async ({
             </span>
           </div>
 
-          <div className="mt-5 font-normal">{creator?.creator_bio}</div>
+          <div className="mt-4 font-normal">{creator?.creator_bio}</div>
 
           <div className="flex items-center space-x-5">
             <NFTCard
