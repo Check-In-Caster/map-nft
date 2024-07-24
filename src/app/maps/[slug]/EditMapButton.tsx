@@ -12,10 +12,10 @@ const EditMapButton = ({
 }) => {
   const account = useAccount();
 
-  //   if (
-  //     account.address?.toLocaleLowerCase() != wallet_address?.toLocaleLowerCase()
-  //   )
-  //     return null;
+  if (
+    account.address?.toLocaleLowerCase() != wallet_address?.toLocaleLowerCase()
+  )
+    return null;
 
   return (
     <Link
