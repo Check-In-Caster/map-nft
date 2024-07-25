@@ -40,20 +40,20 @@ export async function GET(
         <div
           tw="flex flex-col w-full p-0 w-full h-full text-white text-2xl font-medium relative bg-red-500"
           style={{
-            background: "rgba(0, 0, 0, 0.75)",
+            background: map.thumbnail ? "rgba(0, 0, 0, 0.75)" : "#ffffff",
           }}
         >
           <div tw="flex flex-col pt-24 justify-center items-center">
-            {map.map_emoji ? (
+            {!map.thumbnail && map.map_emoji ? (
               <img width={90} height={90} src={map.map_emoji} alt="" />
             ) : null}
 
             <div
               style={{
-                marginTop: "28px",
+                marginTop: map.thumbnail ? "98px" : "28px",
                 fontSize: "54px",
                 fontWeight: "bold",
-                color: "#fff",
+                color: map.thumbnail ? "#fff" : "#000",
               }}
               tw="flex flex-col text-8xl text-white  pt-6 text-center"
             >
@@ -63,7 +63,10 @@ export async function GET(
 
           <div
             tw="flex justify-start items-center text-left mt-auto ml-6 text-white"
-            style={{ color: "#fff", paddingBottom: "20px" }}
+            style={{
+              color: map.thumbnail ? "#fff" : "#000",
+              paddingBottom: "20px",
+            }}
           >
             <img
               src={

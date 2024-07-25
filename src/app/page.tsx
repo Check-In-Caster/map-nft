@@ -64,9 +64,6 @@ export default async function Home({
     searchParams.secret
   );
 
-  console.log("trendingMaps");
-  console.log(trendingMaps);
-
   return (
     <>
       <HeroSection />

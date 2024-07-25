@@ -542,18 +542,20 @@ const Card = ({
       }}
     >
       <div
-        className="h-full w-full text-white p-3"
+        className={`h-full w-full ${imgUrl ? "text-white" : "text-[#000]"} p-3`}
         style={{
-          background: "rgba(0, 0, 0, 0.60)",
+          background: imgUrl ? "rgba(0, 0, 0, 0.60)" : "#fff",
         }}
       >
         <div className="w-full ">
           <div className="w-full aspect-square text-center flex flex-col justify-center">
             <div className="text-center relative text-lg mt-5">
-              <div className="absolute text-6xl -top-16 left-1/2 -translate-x-1/2">
-                <img src={emoji} alt="" />
-              </div>
-              <div className="text-2xl mt-8">{title}</div>
+              {imgUrl ? null : (
+                <div className="absolute text-6xl -top-16 left-1/2 -translate-x-1/2">
+                  <img src={emoji} alt="" />
+                </div>
+              )}
+              <div className={`text-2xl ${imgUrl ? "" : "mt-8"}`}>{title}</div>
             </div>
           </div>
         </div>
