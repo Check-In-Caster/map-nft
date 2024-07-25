@@ -544,7 +544,7 @@ const Card = ({
       <div
         className="h-full w-full text-white p-3"
         style={{
-          background: "rgba(0, 0, 0, 0.45)",
+          background: "rgba(0, 0, 0, 0.60)",
         }}
       >
         <div className="w-full ">

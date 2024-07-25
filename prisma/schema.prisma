@@ -216,46 +216,6 @@ model Settings {
   value String?
 }
 
-model Airdrop {
-  airdrop_id      String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  fid             String?
-  wallet_address  String?
-  farcon_attendee String?
-  checkin_points  String?
-  checkin_count   String?
-  tip_amount      String?
-  season          String? @default("0")
-  farcon_points   String?
-  dpad_stake      String?
-  first_property  String?
-  second_property String?
-  special         Int?    @default(0)
-  total_amount    String?
-}
-
-model AirdropProperty {
-  id              Int     @id @default(autoincrement())
-  fid             String?
-  wallet_address  String?
-  first_property  String?
-  second_property String?
-  special         Int?    @default(0) @db.SmallInt
-}
-
-model AirdropExcelFinal {
-  airdrop_id      String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  fid             String?
-  wallet_address  String?
-  farcon_attendee String?
-  checkin_points  String?
-  checkin_count   String?
-  tip_amount      String?
-  season          String?
-  farcon_points   String?
-  dpad_stake      String?
-  total_amount    BigInt?
-}
-
 model Maps {
   map_id         String          @id @default(uuid()) @db.Uuid
   name           String
