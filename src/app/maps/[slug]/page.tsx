@@ -9,9 +9,11 @@ import { notFound } from "next/navigation";
 import EditMapButton from "./EditMapButton";
 import LikeMap from "./LikeMap";
 import ShareMap from "./ShareMap";
+import OSFont from "@/components/home/os-font";
 
 const lexend = Lexend({
   subsets: ["latin"],
+  weight: "300",
 });
 
 const PlaceCard = ({
@@ -144,11 +146,13 @@ const MapDetailsPage = async ({
       <section className="flex justify-between">
         <div>
           <h1 className="text-4xl">{map?.name}</h1>
-          <h2
-            className={`text-xl mt-2 ${lexend.className} font-light tracking-normal`}
+          <OSFont
+            as="h2"
+            defaultFont="lexend"
+            className="text-xl mt-2 font-light tracking-normal"
           >
             {map?.description}
-          </h2>
+          </OSFont>
 
           <div className="flex gap-2 items-center mt-6">
             <Image

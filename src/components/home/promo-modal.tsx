@@ -1,5 +1,6 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
+import OSFont from "./os-font";
 
 const PromoModal = () => {
   const [showModal, setShowModal] = useState(false);
@@ -26,10 +27,14 @@ const PromoModal = () => {
           <div className="text-3xl font-bold text-center">
             Support Creators by <br /> minting and sharing MAPs! 🎉
           </div>
-          <p className="text-[#666666] text-xl text-center mt-5">
+          <OSFont
+            defaultFont="coolvetica"
+            as="p"
+            className="text-[#666666] text-xl text-center mt-5"
+          >
             Collect MAP NFTs and support creators! You can earn referral fee by
             sharing it.
-          </p>
+          </OSFont>
         </div>
 
         <div className="mt-5 relative h-[278px] w-full overflow-hidden">
