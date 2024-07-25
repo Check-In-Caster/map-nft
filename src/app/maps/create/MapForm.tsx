@@ -21,11 +21,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { PlusIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { createMap, updateMap } from "../actions";
+import { createMap, getLocationsInfo, updateMap } from "../actions";
 
 const PlaceCard = ({
   property_id,
@@ -154,6 +154,32 @@ const MapForm = ({
       }
     >
   >(new Map());
+
+  useEffect(() => {
+    (async () => {
+      const propertyIds = values.places.map((place) => place.property_id);
+
+      if (propertyIds.length === 0) return;
+
+      const locationsMap = await getLocationsInfo(propertyIds);
+
+      const newPlacesMap = new Map() as typeof placesMap;
+
+      locationsMap.forEach((location, property_id) => {
+        newPlacesMap.set(property_id, {
+          name: location.location ?? "",
+          image: location.image ?? "",
+          rating: location.rating ?? 0,
+          category: location.category ?? "",
+          coordinates: location.coordinates as { lat: number; lng: number },
+        });
+      });
+
+      setPlacesMap(newPlacesMap);
+    })();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

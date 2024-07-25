@@ -193,18 +193,28 @@ export async function updateMap({
   }
 }
 
-export async function getLocationInfo(property_id: string) {
-  console.log("property_id", property_id);
-  const property = await prisma.propertyInfo.findFirst({
+export async function getLocationsInfo(propertyIds: string[]) {
+  const properties = await prisma.propertyInfo.findMany({
     where: {
-      property_id,
+      property_id: {
+        in: propertyIds,
+      },
     },
     include: {
       Locations: true,
     },
   });
 
-  return property?.Locations;
+  const locationsMap = new Map<
+    string,
+    Exclude<(typeof properties)[number]["Locations"], null>
+  >();
+
+  for (const property of properties) {
+    if (property.Locations)
+      locationsMap.set(property.property_id, property.Locations);
+  }
+  return locationsMap;
 }
 
 export const getUploadUrl = async ({
