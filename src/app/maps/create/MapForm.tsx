@@ -90,24 +90,28 @@ const PlaceCard = ({
   );
 };
 
-const formSchema = z.object({
-  map_id: z.string().optional(),
-  creator_bio: z.string(),
-  name: z.string().min(2, { message: "Name must have at least 2 characters" }),
-  thumbnail: z.string(),
-  description: z
-    .string()
-    .min(3, { message: "Description must have at least 3 characters" }),
-  emoji: z.string().min(1, { message: "Please select an emoji" }),
-  places: z
-    .array(
-      z.object({
-        property_id: z.string(),
-        description: z.string(),
-      })
-    )
-    .min(1, { message: "You must add at least one place" }),
-});
+const formSchemaFn = (isEdit?: boolean) => {
+  return z.object({
+    map_id: z.string().optional(),
+    creator_bio: isEdit ? z.string().optional() : z.string(),
+    name: z
+      .string()
+      .min(2, { message: "Name must have at least 2 characters" }),
+    thumbnail: z.string(),
+    description: z
+      .string()
+      .min(3, { message: "Description must have at least 3 characters" }),
+    emoji: z.string().min(1, { message: "Please select an emoji" }),
+    places: z
+      .array(
+        z.object({
+          property_id: z.string(),
+          description: z.string(),
+        })
+      )
+      .min(1, { message: "You must add at least one place" }),
+  });
+};
 
 const MapForm = ({
   heading = "Create a map",
@@ -181,6 +185,8 @@ const MapForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const formSchema = formSchemaFn(values.map_id ? true : false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: values,
@@ -208,7 +214,7 @@ const MapForm = ({
           thumbnail,
           name: name,
           places: places,
-          creator_bio,
+          creator_bio: creator_bio as string,
         })
       : await createMap({
           description: description,
@@ -216,7 +222,7 @@ const MapForm = ({
           name: name,
           thumbnail,
           places: places,
-          creator_bio,
+          creator_bio: creator_bio as string,
         });
 
     if (response.status == "error") {
