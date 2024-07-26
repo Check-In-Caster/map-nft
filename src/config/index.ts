@@ -15,8 +15,8 @@ export const REF_WALLET_ADDRESS = is_dev
   : "0xFD8AF1B687Cb42Dc82663a45B78BE2a17C9791E8";
 
 export const CONTRACT_ADDRESS = is_dev
-  ? "0x12CDcD230FB16ceda52147fe978cb5d436031351"
-  : "0x12CDcD230FB16ceda52147fe978cb5d436031351";
+  ? "0xc6aB671DeAD8a2025B28de1Fb4475ACa2D69d725"
+  : "0xc6aB671DeAD8a2025B28de1Fb4475ACa2D69d725";
 
 export const RPC_PROVIDER = is_dev
   ? "https://sepolia.base.org"

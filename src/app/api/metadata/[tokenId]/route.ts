@@ -1,3 +1,4 @@
+import { DOMAIN } from "@/config";
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
 
@@ -10,13 +11,12 @@ export async function GET(
   if (tokenId == "0") {
     return new Response(
       JSON.stringify({
-        name: `Onchain Property by Checkin`,
-        description:
-          "Own Property NFTs, the onchain version of famous places like Eiffel Tower or your favorite local cafe! Owning Property NFTs unlock ephemeral games and rewards!",
-        external_url: `https://maps.checkin.gg/`,
+        name: `Maps by Checkin`,
+        description: "Curate, Mint, Earn. Your Recommendations, onchain.",
+        external_url: `${DOMAIN}/`,
 
-        image: `https://maps.checkin.gg/assets/images/cover_image.png`,
-        imageURI: `https://maps.checkin.gg/assets/images/cover_image.png`,
+        image: `${DOMAIN}/assets/images/cover_image.png`,
+        imageURI: `${DOMAIN}/assets/images/cover_image.png`,
         attributes: [],
       })
     );
@@ -31,7 +31,7 @@ export async function GET(
     },
   });
 
-  const image = "https://maps.checkin.gg/api/image/" + getToken?.property_id;
+  const image = `${DOMAIN}/api/image/` + getToken?.property_id;
 
   if (getToken) {
     return new Response(
@@ -41,7 +41,7 @@ export async function GET(
 ${getToken.Locations?.map_url}`,
         image: `${image}`,
         imageURI: `${image}`,
-        external_url: `https://maps.checkin.gg/`,
+        external_url: `${DOMAIN}`,
         attributes: [
           {
             trait_type: "score",

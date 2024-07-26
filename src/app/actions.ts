@@ -1,5 +1,6 @@
 "use server";
 
+import { DOMAIN } from "@/config";
 import { createNewToken } from "@/lib/deployToken";
 import { prisma } from "@/lib/prisma";
 import "@ethersproject/shims";
@@ -73,10 +74,10 @@ export async function deployToken(property_id: string, type?: string) {
   const maxInt256 = ethers.constants.MaxUint256.div(2).sub(1);
 
   const tokenId = await createNewToken({
-    maxSupply: Number(maxInt256),
-    mintLimit: 0,
+    maxSupply: ethers.constants.MaxUint256,
+    mintLimit: ethers.constants.MaxUint256,
     price: 0,
-    tokenURI: "https://maps.checkin.gg/api/metadata/",
+    tokenURI: `${DOMAIN}/api/metadata/`,
   });
 
   if (tokenId) {

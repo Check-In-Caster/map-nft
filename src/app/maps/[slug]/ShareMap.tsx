@@ -1,4 +1,5 @@
 "use client";
+import { DOMAIN } from "@/config";
 import { Share } from "lucide-react";
 
 import CopyToClipboard from "react-copy-to-clipboard";
@@ -7,7 +8,7 @@ import { useAccount } from "wagmi";
 
 const ShareMap = ({ slug }: { slug: string }) => {
   const account = useAccount();
-  const shareUrl = `https://maps.checkin.gg/maps/${slug}/?ref=${account.address}`;
+  const shareUrl = `${DOMAIN}/maps/${slug}/?ref=${account.address}`;
 
   return (
     <>

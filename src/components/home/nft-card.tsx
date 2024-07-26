@@ -4,12 +4,12 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   CHAIN_ID,
   CONTRACT_ADDRESS,
+  DOMAIN,
   EXPLORER_LINK,
   REF_WALLET_ADDRESS,
   RPC_PROVIDER,
-  baseZoraMinterContractAddress,
 } from "@/config";
-import { baseZoraTokenABI } from "@/constants/zora";
+import { mapsABI } from "@/constants/maps";
 import { cn, isValidEthAddress, shortenAddress } from "@/lib/utils";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import confetti from "canvas-confetti";
@@ -17,7 +17,7 @@ import { ethers } from "ethers";
 import { Link as LinkIcon, Share } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { toast } from "sonner";
@@ -202,7 +202,6 @@ const MintTransaction = ({
 
 const NFTCard = ({
   property_id,
-  referral = "",
   token_id,
   slug,
   edit = false,
@@ -221,7 +220,6 @@ const NFTCard = ({
   disableOutsideInteraction = false,
 }: {
   property_id?: string;
-  referral?: string;
   token_id?: number | undefined;
   slug: string;
   className?: string;
@@ -247,6 +245,8 @@ const NFTCard = ({
 }) => {
   const account = useAccount();
   const router = useRouter();
+  const params = useSearchParams();
+  const referral = params.get("ref");
 
   const { writeContractAsync } = useWriteContract();
 
@@ -316,18 +316,18 @@ const NFTCard = ({
       console.log("________________________________");
       console.log("totalValueInBigInt");
       console.log(totalValueInBigInt);
+      console.log(count);
       console.log("________________________________");
 
       const _mint = await writeContractAsync({
         address: CONTRACT_ADDRESS!,
         chainId: CHAIN_ID,
-        abi: baseZoraTokenABI,
-        functionName: "mintWithRewards",
+        abi: mapsABI,
+        functionName: "mint",
         args: [
-          baseZoraMinterContractAddress,
+          account.address,
           tokenId,
           count,
-          ethers.utils.defaultAbiCoder.encode(["address"], [account.address!]),
           refAddress == "" ? REF_WALLET_ADDRESS : refAddress,
         ],
         value: totalValueInBigInt,
@@ -361,7 +361,7 @@ const NFTCard = ({
     setMintLoading(false);
   };
 
-  const shareUrl = `https://maps.checkin.gg/maps/${slug}/?ref=${account.address}`;
+  const shareUrl = `${DOMAIN}/maps/${slug}/?ref=${account.address}`;
   const shareText = `Just minted ${title} on CheckIn!`;
 
   return (
@@ -401,7 +401,7 @@ const NFTCard = ({
               </div>
               <div>
                 <div className="border border-gray-400 text-center p-3 mt-5">
-                  <p>Zora Free Mint on Base</p>
+                  <p>Free Mint on Base</p>
                   {Number(price) > 0 ? (
                     <p className="text-xl font-bold mt-1">{price} ETH</p>
                   ) : (

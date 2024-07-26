@@ -58,7 +58,6 @@ const Applayout = ({
               <div className="bg-custom-gray-30 text-[#000] pb-8">
                 {pathName !== "/maintenance" ? (
                   <>
-                    {/* <FreeOnChainBanner /> */}
                     <Header />
                     <PromoModal />
                   </>
