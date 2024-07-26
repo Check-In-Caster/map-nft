@@ -4,12 +4,12 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   CHAIN_ID,
   CONTRACT_ADDRESS,
+  DOMAIN,
   EXPLORER_LINK,
   REF_WALLET_ADDRESS,
   RPC_PROVIDER,
-  baseZoraMinterContractAddress,
 } from "@/config";
-import { baseZoraTokenABI } from "@/constants/zora";
+import { mapsABI } from "@/constants/maps";
 import { cn, isValidEthAddress, shortenAddress } from "@/lib/utils";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import confetti from "canvas-confetti";
@@ -17,13 +17,12 @@ import { ethers } from "ethers";
 import { Link as LinkIcon, Share } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { toast } from "sonner";
 import { useAccount, useWriteContract } from "wagmi";
 import CostBreakdown from "../ui/cost-breakdown";
-import Heading from "../ui/heading";
 import Quantity from "../ui/quanitity";
 
 function capitalizeFirstLetter(string: string) {
@@ -46,8 +45,8 @@ const MintTransaction = ({
   creator: {
     wallet: string;
     farcaster?: {
-      name: string;
-      imgUrl: string;
+      name?: string;
+      imgUrl?: string;
     };
   };
   hash?: string;
@@ -108,12 +107,14 @@ const MintTransaction = ({
 
         {!pending && !failed ? (
           <>
-            <Heading className="my-2">
-              <p className="text-center">
-                Minted <br />
-                <div className="text-l font-normal">{title}! 🎉</div>
-              </p>
-            </Heading>
+            <div className="my-2 text-center grid place-items-center">
+              <>
+                <p className="text-center text-black relative text-xl md:text-3xl font-bold px-8 py-3 w-[315px] h-20 grid place-content-center rounded-[50%] ">
+                  Minted <br />
+                </p>
+                <p className="text-2xl font-normal">{title}! 🎉</p>
+              </>
+            </div>
 
             <div className="my-0">
               <p className="mt-8 font-bold text-[#000] text-xl text-center">
@@ -152,10 +153,9 @@ const MintTransaction = ({
                   />
                 </a>
                 <a
-                  href={`https://warpcast.com/~/compose?embeds[]=${shareUrl.replace(
-                    "?property=",
-                    "frame?property="
-                  )}&text=${encodeURI(shareText)}`}
+                  href={`https://warpcast.com/~/compose?embeds[]=${shareUrl}&text=${encodeURI(
+                    shareText
+                  )}`}
                   target="_blank"
                   className="w-14 cursor-pointer h-14 flex justify-center items-center bg-[#855DCD] rounded-full"
                 >
@@ -181,12 +181,6 @@ const MintTransaction = ({
             creator={creator}
           />
         </div>
-        <p className="text-xs mt-3 block text-gray-500">
-          Note: Each Property NFT will only contain the address,
-          lattitude/longitude, country and property score of the Property. Names
-          and photos on checkin.gg are fetched from Google Maps and for display
-          purposes only.
-        </p>
 
         {hash ? (
           <p className="text-center my-5 text-neutral-500 font-bold">
@@ -208,9 +202,9 @@ const MintTransaction = ({
 
 const NFTCard = ({
   property_id,
-  referral = "",
   token_id,
   slug,
+  edit = false,
   className,
   buttonClassName,
   mintButtonText = "Mint",
@@ -226,10 +220,10 @@ const NFTCard = ({
   disableOutsideInteraction = false,
 }: {
   property_id?: string;
-  referral?: string;
   token_id?: number | undefined;
   slug: string;
   className?: string;
+  edit?: boolean;
   buttonClassName?: string;
   mintButtonText?: string;
   hide_mint_btn?: boolean;
@@ -241,8 +235,8 @@ const NFTCard = ({
   creator: {
     wallet: string;
     farcaster?: {
-      name: string;
-      imgUrl: string;
+      name?: string;
+      imgUrl?: string;
     };
   };
   hideCard?: boolean;
@@ -251,6 +245,8 @@ const NFTCard = ({
 }) => {
   const account = useAccount();
   const router = useRouter();
+  const params = useSearchParams();
+  const referral = params.get("ref");
 
   const { writeContractAsync } = useWriteContract();
 
@@ -297,8 +293,6 @@ const NFTCard = ({
       }
     }
 
-    console.log("tokenId:", tokenId);
-
     if (tokenId == null) {
       // may be redirect to the mint page again.
       router.push(`/?property=${property_id}`);
@@ -306,29 +300,12 @@ const NFTCard = ({
     }
 
     try {
-      // const provider =
-      //   signer?.provider ?? new ethers.providers.JsonRpcProvider(RPC_PROVIDER);
-
-      // const contract = new ethers.Contract(
-      //   CONTRACT_ADDRESS,
-      //   baseZoraTokenABI,
-      //   signer
-      // );
-
       const refAddress = isValidEthAddress(referral ? referral : "");
-
-      console.log(String(count * (0.000777 + price)));
-
-      // const network = await provider.getNetwork();
-      // const connectedChainId = network.chainId;
-      // console.log(connectedChainId);
 
       if (account.chainId !== CHAIN_ID) {
         toast("Please connect to the correct network. Chain ID: " + CHAIN_ID);
         return;
       }
-
-      console.log(BigInt(`${count * (0.000777 + price) * 1000000}`));
 
       const priceInWei = ethers.utils.parseUnits(price.toString(), "ether");
       const multiplier = ethers.utils.parseUnits("0.000777", "ether");
@@ -336,33 +313,26 @@ const NFTCard = ({
       const totalValueInWei = priceInWei.add(multiplier).mul(count);
       const totalValueInBigInt = totalValueInWei.toBigInt();
 
+      console.log("________________________________");
+      console.log("totalValueInBigInt");
+      console.log(totalValueInBigInt);
+      console.log(count);
+      console.log("________________________________");
+
       const _mint = await writeContractAsync({
-        address: CONTRACT_ADDRESS,
+        address: CONTRACT_ADDRESS!,
         chainId: CHAIN_ID,
-        abi: baseZoraTokenABI,
-        functionName: "mintWithRewards",
+        abi: mapsABI,
+        functionName: "mint",
         args: [
-          baseZoraMinterContractAddress,
+          account.address,
           tokenId,
           count,
-          ethers.utils.defaultAbiCoder.encode(["address"], [account.address!]),
           refAddress == "" ? REF_WALLET_ADDRESS : refAddress,
         ],
         value: totalValueInBigInt,
       });
 
-      console.log(_mint);
-
-      // const _mint = await contract.mintWithRewards(
-      //   baseZoraMinterContractAddress,
-      //   tokenId,
-      //   count,
-      //   ethers.utils.defaultAbiCoder.encode(["address"], [account.address!]),
-      //   refAddress == "" ? REF_WALLET_ADDRESS : refAddress,
-      //   {
-      //     value: ethers.utils.parseEther(String(count * (0.000777 + price))),
-      //   }
-      // );
       console.log(_mint);
 
       setHash(`${_mint}`);
@@ -391,11 +361,11 @@ const NFTCard = ({
     setMintLoading(false);
   };
 
-  const shareUrl = `https://property.checkin.gg/?property=${property_id}&ref=${account.address}`;
+  const shareUrl = `${DOMAIN}/maps/${slug}/?ref=${account.address}`;
   const shareText = `Just minted ${title} on CheckIn!`;
 
   return (
-    <div className="max-w-[320px] min-w-[250px] h-full w-full mx-auto">
+    <div className="max-w-[320px] min-w-[250px] h-full">
       <Dialog defaultOpen={defaultOpen}>
         <DialogContent
           className="max-w-[600px] w-screen h-[100dvh] px-0 sm:px-6 z-40 max-h-[800px] bg-[#FFF8F0] overflow-y-scroll no-scrollbar"
@@ -431,7 +401,7 @@ const NFTCard = ({
               </div>
               <div>
                 <div className="border border-gray-400 text-center p-3 mt-5">
-                  <p>Zora Free Mint on Base</p>
+                  <p>Free Mint on Base</p>
                   {Number(price) > 0 ? (
                     <p className="text-xl font-bold mt-1">{price} ETH</p>
                   ) : (
@@ -441,16 +411,6 @@ const NFTCard = ({
                 <Quantity count={count} setCount={setCount} />
               </div>
               <div className="w-[280px] md:w-[400px] mt-0">
-                {/* <select
-                  className="bg-transparent border-2 border-neutral-200 focus:border-neutral-200 text-gray-900 text-sm rounded-md block w-full p-2.5 pr-3 mb-8"
-                  value={crypto}
-                  onChange={(e) => {
-                    setCrypto(e.target.value);
-                  }}
-                >
-                  <option value="$ETH">ETH</option>
-                  <option value="$DEGEN">$DEGEN</option>
-                </select> */}
                 <CostBreakdown count={count} price={price} />
 
                 <div className="text-center mt-10">
@@ -478,6 +438,7 @@ const NFTCard = ({
                   )}
                 </div>
               </div>
+              <p className="mt-3 text-gray-500 text-sm">{userMinted} Minted</p>
             </div>
           )}
           {minted && (
@@ -496,7 +457,7 @@ const NFTCard = ({
 
         <div className={hideCard ? "" : "h-full flex flex-col"}>
           {hideCard ? null : (
-            <DialogTrigger asChild className="h-full">
+            <Link href={`/maps/${slug}`} passHref className="h-full">
               <div>
                 <Card
                   className={className}
@@ -507,18 +468,29 @@ const NFTCard = ({
                   creator={creator}
                 />
               </div>
-            </DialogTrigger>
+            </Link>
           )}
 
           {hide_mint_btn && hide_view_btn ? null : (
             <div className="flex gap-2">
               {hide_view_btn ? null : (
-                <Link
-                  href={`/maps/${slug}`}
-                  className={`border text-center border-[#5844C1] py-2 mt-5 w-full disabled:opacity-50 bg-[#fff] text-[#5844C1]`}
-                >
-                  View
-                </Link>
+                <>
+                  {edit ? (
+                    <Link
+                      href={`/maps/edit/${property_id}`}
+                      className={`border text-center border-[#5844C1] py-2 mt-5 w-full disabled:opacity-50 bg-[#fff] text-[#5844C1]`}
+                    >
+                      Edit
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/maps/${slug}`}
+                      className={`border text-center border-[#5844C1] py-2 mt-5 w-full disabled:opacity-50 bg-[#fff] text-[#5844C1]`}
+                    >
+                      View
+                    </Link>
+                  )}
+                </>
               )}
               {hide_mint_btn ? null : (
                 <DialogTrigger asChild>
@@ -556,45 +528,55 @@ const Card = ({
   creator: {
     wallet: string;
     farcaster?: {
-      name: string;
-      imgUrl: string;
+      name?: string;
+      imgUrl?: string;
     };
   };
 }) => {
   return (
-    <div className={`h-full flex flex-col relative p-2 ${className}`}>
-      <div className="w-full">
-        {imgUrl ? (
-          <Image
-            src={imgUrl}
-            alt={title}
-            height={320}
-            width={320}
-            className="w-80 object-cover aspect-square"
-          />
-        ) : (
-          <div className="bg-white w-full aspect-square text-center flex flex-col justify-center">
-            <div className="text-center relative text-lg">
-              <div className="absolute text-6xl -top-16 left-1/2 -translate-x-1/2">
-                <img src={emoji} alt="" />
-              </div>
-              <div className="text-3xl">{title}</div>
+    <div
+      className={`h-full flex flex-col relative ${className}`}
+      style={{
+        backgroundImage: `url(${imgUrl})`,
+        backgroundSize: "cover",
+      }}
+    >
+      <div
+        className={`h-full w-full ${imgUrl ? "text-white" : "text-[#000]"} p-3`}
+        style={{
+          background: imgUrl ? "rgba(0, 0, 0, 0.60)" : "#fff",
+        }}
+      >
+        <div className="w-full ">
+          <div className="w-full aspect-square text-center flex flex-col justify-center">
+            <div className="text-center relative text-lg mt-5">
+              {imgUrl ? null : (
+                <div className="absolute text-6xl -top-16 left-1/2 -translate-x-1/2">
+                  <img src={emoji} alt="" />
+                </div>
+              )}
+              <div className={`text-2xl ${imgUrl ? "" : "mt-8"}`}>{title}</div>
             </div>
           </div>
-        )}
-      </div>
-      <div className="text-xl line-clamp-2 mt-3">{title}</div>
-      <div className="flex gap-2 items-center mt-2">
-        <Image
-          src={creator.farcaster?.imgUrl ?? "https://i.imgur.com/yZOyUGG.png"}
-          alt={creator.farcaster?.name ?? ""}
-          height={28}
-          width={28}
-          className="rounded-full h-7 w-7 object-cover"
-        />
-        <span className="text-sm">
-          {creator.farcaster?.name ?? shortenAddress(creator.wallet)}
-        </span>
+        </div>
+        {/* truncate text-ellipsis overflow-hidden */}
+
+        <Link
+          href={`/my-maps/${creator.wallet}`}
+          passHref
+          className="flex gap-2 items-center mt-2"
+        >
+          <Image
+            src={creator.farcaster?.imgUrl ?? "https://i.imgur.com/yZOyUGG.png"}
+            alt={creator.farcaster?.name ?? ""}
+            height={28}
+            width={28}
+            className="rounded-full h-7 w-7 object-cover"
+          />
+          <span className="text-sm">
+            {creator.farcaster?.name ?? shortenAddress(creator.wallet)}
+          </span>
+        </Link>
       </div>
     </div>
   );

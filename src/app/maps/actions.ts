@@ -1,5 +1,6 @@
 "use server";
 
+import { getFarcasterAccount } from "@/lib/airstack";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 const AWS = require("aws-sdk");
@@ -142,6 +143,11 @@ export async function updateMap({
       },
     });
 
+    const farcasterProfile =
+      map.wallet_address != ""
+        ? await getFarcasterAccount(map?.wallet_address)
+        : null;
+
     await prisma.mapsCreator.upsert({
       where: {
         wallet_address: wallet_address,
@@ -149,9 +155,13 @@ export async function updateMap({
       create: {
         creator_bio: creator_bio,
         wallet_address: wallet_address,
+        name: farcasterProfile?.profileName ?? "",
+        profile_image: farcasterProfile?.profileImage ?? "",
       },
       update: {
         creator_bio: creator_bio,
+        name: farcasterProfile?.profileName ?? "",
+        profile_image: farcasterProfile?.profileImage ?? "",
       },
     });
 
@@ -183,18 +193,28 @@ export async function updateMap({
   }
 }
 
-export async function getLocationInfo(property_id: string) {
-  console.log("property_id", property_id);
-  const property = await prisma.propertyInfo.findFirst({
+export async function getLocationsInfo(propertyIds: string[]) {
+  const properties = await prisma.propertyInfo.findMany({
     where: {
-      property_id,
+      property_id: {
+        in: propertyIds,
+      },
     },
     include: {
       Locations: true,
     },
   });
 
-  return property?.Locations;
+  const locationsMap = new Map<
+    string,
+    Exclude<(typeof properties)[number]["Locations"], null>
+  >();
+
+  for (const property of properties) {
+    if (property.Locations)
+      locationsMap.set(property.property_id, property.Locations);
+  }
+  return locationsMap;
 }
 
 export const getUploadUrl = async ({
@@ -212,8 +232,6 @@ export const getUploadUrl = async ({
   const s3 = new AWS.S3();
 
   try {
-    console.log({ name, type });
-
     const fileParams = {
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: name,
@@ -228,4 +246,50 @@ export const getUploadUrl = async ({
   } catch (err) {
     return null;
   }
+};
+
+export const markFavorite = async ({ map_id }: { map_id: string }) => {
+  const session = await getServerSession();
+
+  const wallet_address = session?.user?.name?.toLocaleLowerCase() ?? "";
+
+  if (!wallet_address) {
+    return {
+      status: "error",
+      message: "Please connect wallet to continue",
+    };
+  }
+
+  const favorite = await prisma.mapsLiked.findFirst({
+    where: {
+      map_id,
+      wallet_address,
+    },
+  });
+
+  if (favorite) {
+    await prisma.mapsLiked.deleteMany({
+      where: {
+        map_id: favorite.map_id,
+        wallet_address: favorite.wallet_address,
+      },
+    });
+
+    return {
+      status: "success",
+      message: "Removed from favorites",
+    };
+  }
+
+  await prisma.mapsLiked.create({
+    data: {
+      map_id,
+      wallet_address,
+    },
+  });
+
+  return {
+    status: "success",
+    message: "Added to favorites",
+  };
 };

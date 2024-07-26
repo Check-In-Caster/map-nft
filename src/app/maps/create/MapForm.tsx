@@ -3,7 +3,6 @@
 import AppleMap from "@/components/home/map";
 import Search from "@/components/home/search";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import ImageUpload from "@/components/ui/file-upload";
 import {
   FormControl,
@@ -18,55 +17,53 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import { zodResolver } from "@hookform/resolvers/zod";
 import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { PlusIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { createMap, getLocationInfo, updateMap } from "../actions";
+import { z } from "zod";
+import { createMap, getLocationsInfo, updateMap } from "../actions";
 
 const PlaceCard = ({
   property_id,
+  placeSearch,
   placeDescription,
+  placesMap,
   removePlace,
 }: {
   property_id: string;
+  placeSearch: React.ReactNode;
   placeDescription: React.ReactNode;
+  placesMap: Map<
+    string,
+    {
+      name: string;
+      image: string;
+      rating: number;
+      category: string;
+      coordinates: { lat: number; lng: number };
+    }
+  >;
   removePlace?: React.ReactNode;
 }) => {
-  const [location, setLocation] = useState<{
-    name: string;
-    image: string;
-    rating: number;
-    category: string;
-  } | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      const location = await getLocationInfo(property_id);
-
-      if (location)
-        setLocation({
-          name: location.location ?? "",
-          image: location.image ?? "",
-          rating: location.rating ?? 0,
-          category: location.category ?? "",
-        });
-    })();
-  }, [property_id]);
+  const location = placesMap.get(property_id);
 
   return (
     <>
-      <div className="flex mt-4">
-        <div>
-          <img
-            src={location?.image ?? "https://via.placeholder.com/96"}
-            alt="place"
-            className="rounded w-24 aspect-square object-cover"
-          />
-        </div>
-        <div className="w-full pl-6 relative">
+      <div className="flex mt-4 gap-x-6">
+        {location ? (
+          <div>
+            <img
+              src={location?.image ?? "https://via.placeholder.com/96"}
+              alt="place"
+              className="rounded w-24 aspect-square object-cover"
+            />
+          </div>
+        ) : null}
+        <div className="w-full relative">
           {location ? (
             <>
               <div className="text-xl">{location.name}</div>
@@ -80,15 +77,40 @@ const PlaceCard = ({
               </div>
               <div className="font-light">{location.category}</div>
             </>
-          ) : null}
+          ) : (
+            placeSearch
+          )}
 
           <div className="absolute right-0 top-0">{removePlace}</div>
         </div>
       </div>
 
-      {placeDescription}
+      {location ? placeDescription : null}
     </>
   );
+};
+
+const formSchemaFn = (isEdit?: boolean) => {
+  return z.object({
+    map_id: z.string().optional(),
+    creator_bio: isEdit ? z.string().optional() : z.string(),
+    name: z
+      .string()
+      .min(2, { message: "Name must have at least 2 characters" }),
+    thumbnail: z.string(),
+    description: z
+      .string()
+      .min(3, { message: "Description must have at least 3 characters" }),
+    emoji: z.string().min(1, { message: "Please select an emoji" }),
+    places: z
+      .array(
+        z.object({
+          property_id: z.string(),
+          description: z.string(),
+        })
+      )
+      .min(1, { message: "You must add at least one place" }),
+  });
 };
 
 const MapForm = ({
@@ -124,17 +146,63 @@ const MapForm = ({
   };
 }) => {
   const router = useRouter();
-  const [openModal, setOpenModal] = useState(false);
-  const form = useForm({
+  const [placesMap, setPlacesMap] = useState<
+    Map<
+      string,
+      {
+        name: string;
+        image: string;
+        rating: number;
+        category: string;
+        coordinates: { lat: number; lng: number };
+      }
+    >
+  >(new Map());
+
+  useEffect(() => {
+    (async () => {
+      const propertyIds = values.places.map((place) => place.property_id);
+
+      if (propertyIds.length === 0) return;
+
+      const locationsMap = await getLocationsInfo(propertyIds);
+
+      const newPlacesMap = new Map() as typeof placesMap;
+
+      locationsMap.forEach((location, property_id) => {
+        newPlacesMap.set(property_id, {
+          name: location.location ?? "",
+          image: location.image ?? "",
+          rating: location.rating ?? 0,
+          category: location.category ?? "",
+          coordinates: location.coordinates as { lat: number; lng: number },
+        });
+      });
+
+      setPlacesMap(newPlacesMap);
+    })();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const formSchema = formSchemaFn(values.map_id ? true : false);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: values,
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, update } = useFieldArray({
     control: form.control,
     name: "places",
   });
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (values.thumbnail === "" && values.emoji === "") {
+      toast.error("Please upload a thumbnail or select an emoji");
+      return;
+    }
+
     const { map_id, name, description, emoji, places, thumbnail, creator_bio } =
       values;
 
@@ -146,7 +214,7 @@ const MapForm = ({
           thumbnail,
           name: name,
           places: places,
-          creator_bio,
+          creator_bio: creator_bio as string,
         })
       : await createMap({
           description: description,
@@ -154,7 +222,7 @@ const MapForm = ({
           name: name,
           thumbnail,
           places: places,
-          creator_bio,
+          creator_bio: creator_bio as string,
         });
 
     if (response.status == "error") {
@@ -171,8 +239,6 @@ const MapForm = ({
 
   const emojiValue = form.watch("emoji");
 
-  console.log(form.getValues());
-
   return (
     <div className="mt-8 w-full max-w-7xl mx-auto mb-8 p-4 md:p-0">
       <div className="text-center text-2xl md:text-4xl my-10">{heading}</div>
@@ -188,10 +254,15 @@ const MapForm = ({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Map Name</FormLabel>
+                    <FormLabel>Map Name*</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
+                    {form.formState.errors.name && (
+                      <div className="text-red-500 text-sm">
+                        {form.formState.errors.name.message}
+                      </div>
+                    )}
                   </FormItem>
                 )}
               />
@@ -201,10 +272,15 @@ const MapForm = ({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Map Description</FormLabel>
+                    <FormLabel>Map Description*</FormLabel>
                     <FormControl>
                       <Textarea {...field} />
                     </FormControl>
+                    {form.formState.errors.description && (
+                      <div className="text-red-500 text-sm">
+                        {form.formState.errors.description.message}
+                      </div>
+                    )}
                   </FormItem>
                 )}
               />
@@ -216,7 +292,7 @@ const MapForm = ({
                     name="creator_bio"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Creator Bio</FormLabel>
+                        <FormLabel>Creator Bio*</FormLabel>
                         <FormControl>
                           <Textarea {...field} />
                         </FormControl>
@@ -227,7 +303,7 @@ const MapForm = ({
               )}
 
               <div>
-                <FormLabel className="mb-4 block">Thumbnail</FormLabel>
+                <FormLabel className="mb-4 block">Thumbnail*</FormLabel>
                 <ImageUpload
                   path="checkin-maps"
                   label="Thumbnail"
@@ -240,18 +316,21 @@ const MapForm = ({
 
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline">
-                    {emojiValue ? (
-                      <img src={emojiValue} className="w-6 h-6 mr-4" />
-                    ) : null}
-                    Map Emoji
-                  </Button>
+                  <div>
+                    <FormLabel className="mb-4 block">Map Emoji*</FormLabel>
+
+                    <Button type="button" variant="outline">
+                      {emojiValue ? (
+                        <img src={emojiValue} className="w-6 h-6 mr-4" />
+                      ) : null}
+                      Select Emoji
+                    </Button>
+                  </div>
                 </PopoverTrigger>
                 <PopoverContent className="w-full">
                   <EmojiPicker
                     emojiStyle={EmojiStyle.TWITTER}
                     onEmojiClick={(e) => {
-                      console.log(e.imageUrl);
                       form.setValue("emoji", e.imageUrl);
                     }}
                   />
@@ -263,10 +342,42 @@ const MapForm = ({
                   <PlaceCard
                     key={item.id}
                     property_id={item.property_id}
+                    placesMap={placesMap}
                     removePlace={
-                      <button type="button" onClick={() => remove(index)}>
+                      <button
+                        type="button"
+                        className="mt-2"
+                        onClick={() => remove(index)}
+                      >
                         <X size={24} />{" "}
                       </button>
+                    }
+                    placeSearch={
+                      <div className="pr-8">
+                        <Search
+                          setProperty={(property) => {
+                            update(index, {
+                              ...fields[index],
+                              property_id: property.property_id,
+                            });
+
+                            const newPlacesMap = new Map(
+                              JSON.parse(JSON.stringify(Array.from(placesMap)))
+                            ) as typeof placesMap;
+                            newPlacesMap.set(property.property_id, {
+                              name: property.Locations.location ?? "",
+                              image: property.Locations.image ?? "",
+                              rating: property.Locations.rating ?? 0,
+                              category: property.Locations.category ?? "",
+                              coordinates: property.Locations.coordinates as {
+                                lat: number;
+                                lng: number;
+                              },
+                            });
+                            setPlacesMap(newPlacesMap);
+                          }}
+                        />
+                      </div>
                     }
                     placeDescription={
                       <FormField
@@ -293,12 +404,20 @@ const MapForm = ({
                 <a
                   className="mt-8 flex items-center cursor-pointer"
                   onClick={() => {
-                    setOpenModal(true);
+                    append({
+                      description: "",
+                      property_id: "",
+                    });
                   }}
                 >
                   <PlusIcon size={24} className="mr-2 text-[#EF9854]" />
                   Add a Place
                 </a>
+                {form.formState.errors.places && (
+                  <div className="text-red-500 text-sm mt-2">
+                    {form.formState.errors.places.message}
+                  </div>
+                )}
               </div>
               <button
                 type="submit"
@@ -309,51 +428,30 @@ const MapForm = ({
             </form>
           </FormProvider>
         </div>
-        <div className="grid place-items-center">
+        <div className="grid place-items-center max-h-[800px]">
           <AppleMap
             token={mapToken}
-            // coordinatesArray={userProperties
-            //   .map((property) => {
-            //     const coordinates = property.PropertyInfo?.Locations
-            //       .coordinates as { lat: number; lng: number } | undefined;
-            //     if (coordinates)
-            //       return {
-            //         lat: coordinates.lat,
-            //         lng: coordinates.lng,
-            //       };
-            //   })
-            //   .filter((c): c is { lat: number; lng: number } => !!c)}
+            coordinatesArray={(() => {
+              const propertyIds = form
+                .getValues()
+                .places.map((place) => place.property_id);
+
+              let coordinates: {
+                lat: number;
+                lng: number;
+              }[] = [];
+
+              for (const propertyId of propertyIds) {
+                const location = placesMap.get(propertyId);
+                if (location?.coordinates)
+                  coordinates.push(location.coordinates);
+              }
+
+              return coordinates;
+            })()}
           />
         </div>
       </div>
-
-      <Dialog
-        open={openModal}
-        onOpenChange={(open) => {
-          if (!open) {
-            setOpenModal(false);
-          }
-        }}
-      >
-        <DialogContent className="h-96 max-w-[800px] w-full">
-          <div>
-            <div className="bg-white">
-              <Search
-                setProperty={(property) => {
-                  append({
-                    description: "",
-                    property_id: property.property_id,
-                  });
-                  setOpenModal(false);
-                }}
-              />
-            </div>
-            <div className="text-center h-full flex items-center justify-center pb-20">
-              Search to get a list of locations
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

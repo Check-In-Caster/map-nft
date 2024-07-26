@@ -98,9 +98,9 @@ const Search: React.FC<{
 
   return (
     <div className="w-full flex justify-center">
-      <div className="md:w-3/5 flex gap-x-5" ref={groupRef}>
+      <div className="w-full flex gap-x-5" ref={groupRef}>
         <div
-          className="flex items-center relative p-1 px-2 text-[16px] border w-full border-gray-900 bg-white cursor-pointer"
+          className="flex items-center relative p-1 px-2 text-[16px] w-full rounded-md border bg-white border-slate-200 text-slate-500 cursor-pointer group group-focus-visible:ring-2 group-focus-visible:ring-slate-950 group-focus-visible:ring-offset-2"
           onClick={() => {
             inputRef.current?.focus();
           }}
@@ -109,10 +109,11 @@ const Search: React.FC<{
           <input
             type="text"
             placeholder="Search location"
-            className="ml-2 w-full placeholder:text-[#060707] outline-none"
+            className="w-full bg-white px-3 py-2 text-sm text-black ring-offset-white placeholder:text-slate-500 focus-visible:outline-none"
             value={inputValue}
             onChange={onInputChange}
             ref={inputRef}
+            tabIndex={10}
           />
           <div
             className={`absolute z-100 bg-white left-0 right-0 top-9 ${
@@ -122,6 +123,7 @@ const Search: React.FC<{
             {inputValue &&
               predictionResults.map((prediction) => (
                 <button
+                  type="button"
                   key={prediction.place_id}
                   className="flex w-full items-center border-b px-3 py-2 text-left text-sm"
                   onClick={() => handleClick(prediction.place_id)}

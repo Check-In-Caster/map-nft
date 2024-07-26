@@ -23,8 +23,8 @@ const mapsTokenCache = unstable_cache(
       origin:
         process.env.NODE_ENV === "development"
           ? "*"
-          : domain.includes("checkincaster")
-          ? "*.checkincaster.xyz"
+          : domain.includes("vercel.app")
+          ? "https://maps-nft-git-dev-beyond-club.vercel.app"
           : "*.checkin.gg",
     };
     const token = jwt.sign(payload, privateKey, {

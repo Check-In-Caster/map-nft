@@ -14,54 +14,43 @@ const getData = async (propertyId: string, secret: string) => {
 
   const maintenance_mode = settings?.value;
 
-  if (maintenance_mode === "true" && secret != "QWKGJTSV") {
+  if (maintenance_mode === "true" && secret != process.env.ACCESS_SECRET) {
     return redirect("/maintenance");
   }
 
-  // const defaultProperty = await prisma.propertyInfo.findFirst({
-  //   where: {
-  //     property_id: "d69f511d-46d0-4d18-a520-f40782d9f4fb",
-  //   },
-  //   include: {
-  //     Locations: true,
-  //   },
-  // });
-
   const trendingMaps = await prisma.maps.findMany({
+    orderBy: {
+      total_minted: "desc",
+    },
+    include: {
+      MapsCreator: true,
+    },
+    take: 4,
+  });
+
+  const featuredMaps = await prisma.maps.findMany({
+    where: {
+      map_id: {
+        in: [
+          "557b7107-f020-493b-9c01-483b49876bcf",
+          "5cca9abb-5d94-471c-8277-55b3cab5f72b",
+          "80f8ee6e-1645-4557-85a9-97bc36a073b5",
+          "91ddd21c-96b5-412f-ba85-8872b1f4ce12",
+        ],
+      },
+    },
+    include: {
+      MapsCreator: true,
+    },
     orderBy: {
       total_minted: "desc",
     },
     take: 4,
   });
 
-  // // [FIX] - cache these results.
-  // const owners = await prisma.propertySales.groupBy({
-  //   by: ["wallet_address"],
-  // });
-
-  // const properties = await prisma.propertySales.aggregate({
-  //   _sum: {
-  //     quantity: true,
-  //   },
-  // });
-
-  // const property = propertyId
-  //   ? await prisma.propertyInfo.findUnique({
-  //       include: {
-  //         Locations: true,
-  //       },
-  //       where: {
-  //         property_id: propertyId,
-  //       },
-  //     })
-  //   : null;
-
   return {
-    // owners: owners.length.toString(),
-    // properties: (properties?._sum?.quantity ?? 0).toString(),
-    // property: property,
-    // defaultProperty: defaultProperty,
     trendingMaps,
+    featuredMaps,
   };
 };
 
@@ -70,14 +59,10 @@ export default async function Home({
 }: {
   searchParams: Record<string, string>;
 }) {
-  const { trendingMaps } = await getData(
+  const { trendingMaps, featuredMaps } = await getData(
     searchParams.property,
     searchParams.secret
   );
-
-  // await getData(searchParams.property, searchParams.secret);
-
-  console.log(trendingMaps);
 
   return (
     <>
@@ -98,6 +83,7 @@ export default async function Home({
             return (
               <NFTCard
                 key={map.map_id}
+                userMinted={Number(map.total_minted ?? 0)}
                 property_id={map.map_id!}
                 token_id={map.token_id ? Number(map.token_id) : undefined}
                 title={map.name}
@@ -106,6 +92,10 @@ export default async function Home({
                 emoji={map.map_emoji ?? undefined}
                 creator={{
                   wallet: map.wallet_address,
+                  farcaster: {
+                    imgUrl: map.MapsCreator?.profile_image ?? undefined,
+                    name: map.MapsCreator?.name ?? undefined,
+                  },
                 }}
               />
             );
@@ -113,7 +103,7 @@ export default async function Home({
         </div>
 
         <Heading label="Tokyo Maps" />
-        <TrendingMaps />
+        <TrendingMaps maps={featuredMaps} />
       </div>
     </>
   );

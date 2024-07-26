@@ -24,8 +24,6 @@ const ImageUpload = (props: ImageUploadProps) => {
     maxSize: 10 * 1024 * 1024,
   });
 
-  console.log(acceptedFiles);
-
   const [loading, setLoading] = useState(0);
   const {
     label,
@@ -43,11 +41,6 @@ const ImageUpload = (props: ImageUploadProps) => {
     setLoading(10);
     const fileType = selectedFile.type.split("/")[1];
     const newName = `${uuidv4()}.${fileType}`;
-
-    console.log({
-      name: `${props.path}/${newName}`,
-      type: selectedFile.type,
-    });
 
     const data = await getUploadUrl({
       name: `${props.path}/${newName}`,
@@ -105,13 +98,13 @@ const ImageUpload = (props: ImageUploadProps) => {
           <img
             width={160}
             height={160}
-            className="w-[160px] h-[160px] mt-2 rounded-md"
+            className="w-[160px] h-[160px] mt-2 rounded-md object-cover"
             src={`${imageFile}`}
             alt=""
           />
 
           <a
-            className="mt-3 mb-1"
+            className="inline-block mb-1 bg-gray-100 border rounded-md px-3 py-1.5 mt-5"
             onClick={() => {
               props.handleUploadFile("");
               setImageFile("");

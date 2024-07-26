@@ -1,3 +1,4 @@
+import { DOMAIN } from "@/config";
 import { Link } from "lucide-react";
 import Image from "next/image";
 import CopyToClipboard from "react-copy-to-clipboard";
@@ -7,8 +8,8 @@ import { Dialog, DialogContent, DialogTrigger } from "./dialog";
 
 const ShareRefLink = ({ wallet_address }: { wallet_address: string }) => {
   const account = useAccount();
-  const shareUrl = `https://property.checkin.gg/stats/${wallet_address}?ref=${account?.address}`;
-  const portfolioFrameUrl = `https://property.checkin.gg/portfolio?wallet_address=${wallet_address}`;
+  const shareUrl = `${DOMAIN}/my-maps/${wallet_address}?ref=${account?.address}`;
+  const portfolioFrameUrl = `${DOMAIN}/my-maps/${wallet_address}?ref=${account?.address}`;
   const shareText =
     "Check out the onchain properties I own in my portfolio - create yours too!";
 

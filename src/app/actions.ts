@@ -1,5 +1,6 @@
 "use server";
 
+import { DOMAIN } from "@/config";
 import { createNewToken } from "@/lib/deployToken";
 import { prisma } from "@/lib/prisma";
 import "@ethersproject/shims";
@@ -70,20 +71,22 @@ export async function deployToken(property_id: string, type?: string) {
     return Number(propertyInfo.token_id);
   }
 
+  const maxInt256 = ethers.constants.MaxUint256.div(2).sub(1);
+
   const tokenId = await createNewToken({
-    maxSupply: Number(ethers.constants.MaxInt256),
-    mintLimit: Number(ethers.constants.MaxInt256),
-    price: 0.000777,
-    tokenURI: "https://maps.checkin.gg/api/metadata/",
+    maxSupply: ethers.constants.MaxUint256,
+    mintLimit: ethers.constants.MaxUint256,
+    price: 0,
+    tokenURI: `${DOMAIN}/api/metadata/`,
   });
 
   if (tokenId) {
-    const propertyInfo = await prisma.propertyInfo.update({
+    const propertyInfo = await prisma.maps.update({
       where: {
-        property_id: property_id,
+        map_id: property_id,
       },
       data: {
-        token_id: Number(tokenId),
+        token_id: String(Number(tokenId)),
       },
     });
 

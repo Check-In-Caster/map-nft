@@ -8,6 +8,9 @@ import { Maps, MapsCollected, MapsLiked } from "@prisma/client";
 import Image from "next/image";
 import { useAccount } from "wagmi";
 
+type MapCollectedProps = { map: Maps & MapsCollected };
+type MapLikedProps = { map: Maps & MapsLiked };
+
 const MyStats = ({
   profile,
   stats,
@@ -17,10 +20,10 @@ const MyStats = ({
 }: {
   checkInCount?: number;
 
-  maps?: {
+  maps: {
     created: Maps[];
-    liked: { map: Maps & MapsCollected }[];
-    collected: { map: Maps & MapsLiked }[];
+    liked: MapLikedProps[];
+    collected: MapCollectedProps[];
   };
 
   profile?: {
@@ -59,24 +62,24 @@ const MyStats = ({
           </div>
         </div>
         <div className="flex flex-col md:flex-row space-x-5 items-center justify-between min-w-[500px] my-10 md:my-0">
-          <div className="py-4 text-center bg-white p-2 w-2/3 my-3 md:my-0 md:min-w-40 h-24">
+          <div className="py-4 text-center bg-white p-2 w-full md:w-2/3 my-3 md:my-0 md:min-w-40 h-24">
             <p className="text-lg font-medium">Maps Created</p>
             <p className="text-3xl font-semibold mt-2">{stats?.maps_created}</p>
           </div>
-          <div className="py-4 text-center bg-white p-2 w-2/3 my-3 md:my-0 md:min-w-40 h-24">
+          <div className="py-4 text-center bg-white p-2 w-full md:w-2/3 my-3 md:my-0 md:min-w-40 h-24">
             <p className="text-lg font-medium">Maps Collected</p>
             <p className="text-3xl font-semibold mt-2">
               {stats?.maps_collected}
             </p>
           </div>
-          <div className="py-4 text-center bg-white p-2 w-2/3 my-3 md:my-0 md:min-w-40 h-24">
+          <div className="py-4 text-center bg-white p-2 w-full md:w-2/3 my-3 md:my-0 md:min-w-40 h-24">
             <p className="text-lg font-medium">Checkins</p>
             <p className="text-3xl font-semibold mt-2">{checkInCount}</p>
           </div>
         </div>
       </div>
       <div>
-        <div className="flex mt-20 justify-center items-center">
+        <div className="flex md:mt-20 justify-center items-center">
           <div className="ml-auto">
             <ShareRefLink wallet_address={walletAddress} />
           </div>
@@ -99,6 +102,7 @@ const MyStats = ({
                 <NFTCard
                   key={map.map_id}
                   property_id={map.map_id!}
+                  userMinted={Number(map.total_minted ?? 0)}
                   token_id={map.token_id ? Number(map.token_id) : undefined}
                   title={map.name}
                   slug={map.slug}
@@ -107,6 +111,7 @@ const MyStats = ({
                   creator={{
                     wallet: map.wallet_address,
                   }}
+                  edit
                 />
               );
             })}
@@ -127,6 +132,7 @@ const MyStats = ({
                 <NFTCard
                   key={collected.map.map_id}
                   property_id={collected.map.map_id!}
+                  userMinted={Number(collected.map.total_minted ?? 0)}
                   token_id={
                     collected.map.token_id
                       ? Number(collected.map.token_id)
@@ -159,6 +165,7 @@ const MyStats = ({
                 <NFTCard
                   key={like.map.map_id}
                   property_id={like.map.map_id!}
+                  userMinted={Number(like.map.total_minted ?? 0)}
                   token_id={
                     like.map.token_id ? Number(like.map.token_id) : undefined
                   }

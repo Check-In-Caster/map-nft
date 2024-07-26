@@ -1,8 +1,12 @@
 import { getMapsToken } from "@/components/home/actions";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 import MapForm from "../../create/MapForm";
 
 const getMapDetails = async (id: string) => {
+  const session = await getServerSession();
+
   const map = await prisma.maps.findFirst({
     where: {
       map_id: id,
@@ -11,6 +15,13 @@ const getMapDetails = async (id: string) => {
       MapsPlaces: true,
     },
   });
+
+  if (
+    map?.wallet_address.toLocaleLowerCase() !=
+    session?.user?.name?.toLocaleLowerCase()
+  ) {
+    return null;
+  }
 
   return map;
 };
@@ -26,13 +37,16 @@ const Page = async ({
 }) => {
   const map = await getMapDetails(params.map_id);
 
-  const mapToken = await getMapsToken();
+  if (!map) {
+    return redirect("/");
+  }
 
   if (!map)
     return (
       <div className="mt-8 w-full max-w-7xl mx-auto mb-8">Map not found</div>
     );
 
+  const mapToken = await getMapsToken();
   return (
     <MapForm
       heading="Edit Map"
