@@ -68,6 +68,28 @@ function getLatLngCenter(coordinates: { lat: number; lng: number }[]) {
   return { lat: rad2degr(lat), lng: rad2degr(lng) };
 }
 
+function filterCoordinatesArray(
+  coordinatesArray: { lat: number; lng: number }[]
+) {
+  const newCoordinatesArray = Array.from(
+    new Set(
+      (
+        coordinatesArray?.filter((coordinates) => {
+          if (
+            (coordinates.lat || coordinates.lat === 0) &&
+            (coordinates.lng || coordinates.lng === 0)
+          )
+            return true;
+        }) as { lat: number; lng: number }[]
+      ).map((coordinates) => JSON.stringify(coordinates))
+    )
+  ).map(
+    (coordinates) => JSON.parse(coordinates) as { lat: number; lng: number }
+  );
+
+  return newCoordinatesArray;
+}
+
 const AppleMap: React.FC<MapsProps> = ({
   token,
   coordinates,
@@ -78,37 +100,28 @@ const AppleMap: React.FC<MapsProps> = ({
     {
       lat: number;
       lng: number;
-      name: string;
     }[]
   >([]);
   const [centerCoordinates, setCenterCoordinates] = useState({
     lat: 0,
     lng: 0,
   });
-  const [applyRestriction, setApplyRestriction] = useState(true);
+  const [applyRestriction, setApplyRestriction] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // for initial load only
   useEffect(() => {
-    // removing duplicates and invalid coordinates
-    const newCoordinatesArray = Array.from(
-      new Set(
-        (
-          coordinatesArray?.filter((coordinates) => {
-            if (
-              (coordinates.lat || coordinates.lat === 0) &&
-              (coordinates.lng || coordinates.lng === 0)
-            )
-              return true;
-          }) as { lat: number; lng: number; name: string }[]
-        ).map((coordinates) => JSON.stringify(coordinates))
-      )
-    ).map(
-      (coordinates) =>
-        JSON.parse(coordinates) as { lat: number; lng: number; name: string }
-    );
+    if (!coordinatesArray) {
+      setApplyRestriction(true);
+      setInitialLoad(false);
+      return;
+    }
+
+    const newCoordinatesArray = filterCoordinatesArray(coordinatesArray);
 
     if (newCoordinatesArray.length > 0) {
       setFilteredCoordinatesArray(newCoordinatesArray);
@@ -141,17 +154,43 @@ const AppleMap: React.FC<MapsProps> = ({
       }
 
       setCenterCoordinates(coordinatesCloseToCenter);
-      setApplyRestriction(true);
     }
 
-    let timeout = setTimeout(() => {
-      setApplyRestriction(false);
-    }, 1000);
+    setApplyRestriction(true);
+    setInitialLoad(false);
 
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [coordinatesArray]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // if coordinatesArray changes filter and assign last coordinates as center
+  useEffect(() => {
+    if (initialLoad) return;
+    if (!coordinatesArray) return;
+
+    const newCoordinatesArray = filterCoordinatesArray(coordinatesArray);
+    if (
+      JSON.stringify(newCoordinatesArray) ===
+      JSON.stringify(filteredCoordinatesArray)
+    )
+      return;
+
+    setFilteredCoordinatesArray(newCoordinatesArray);
+    setCenterCoordinates(newCoordinatesArray[newCoordinatesArray.length - 1]);
+    setApplyRestriction(true);
+  }, [initialLoad, coordinatesArray, filteredCoordinatesArray]);
+
+  // apply restriction for 1 second and remove it
+  useEffect(() => {
+    if (applyRestriction) {
+      let timeout = setTimeout(() => {
+        setApplyRestriction(false);
+      }, 1000);
+
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
+  }, [applyRestriction]);
 
   return (
     <div className="w-full h-full flex items-center justify-center">
@@ -169,8 +208,8 @@ const AppleMap: React.FC<MapsProps> = ({
           {coordinates && (
             <Marker latitude={coordinates.lat} longitude={coordinates.lng} />
           )}
-          {coordinatesArray
-            ? coordinatesArray.map((coordinates) => (
+          {filteredCoordinatesArray
+            ? filteredCoordinatesArray.map((coordinates) => (
                 <Marker
                   key={`${JSON.stringify(coordinates)}`}
                   latitude={coordinates.lat}
