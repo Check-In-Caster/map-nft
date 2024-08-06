@@ -94,13 +94,6 @@ const MapDetailsPage = async ({
   const session = await getServerSession();
   const wallet_address = session?.user?.name?.toLocaleLowerCase() ?? "";
 
-  const minted = await prisma.mapsCollected.findFirst({
-    where: {
-      wallet_address: wallet_address,
-      map_id: searchParams.map_id,
-    },
-  });
-
   const map = await prisma.maps.findFirst({
     where: {
       slug,
@@ -114,6 +107,13 @@ const MapDetailsPage = async ({
   if (!map) {
     notFound();
   }
+
+  const minted = await prisma.mapsCollected.findFirst({
+    where: {
+      wallet_address: wallet_address,
+      map_id: map.map_id,
+    },
+  });
 
   const creator = map.MapsCreator;
 

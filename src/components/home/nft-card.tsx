@@ -25,10 +25,6 @@ import { useAccount, useWriteContract } from "wagmi";
 import CostBreakdown from "../ui/cost-breakdown";
 import Quantity from "../ui/quanitity";
 
-function capitalizeFirstLetter(string: string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
 const MintTransaction = ({
   title,
   imgUrl,
