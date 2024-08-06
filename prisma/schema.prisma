@@ -107,3 +107,14 @@ model MapsCreator {
   profile_image  String?
   Maps           Maps[]
 }
+
+model Settings {
+  id    Int     @id @default(autoincrement())
+  name  String?
+  value String?
+}
+
+model Checkin {
+  checkin_id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fid        String
+}
