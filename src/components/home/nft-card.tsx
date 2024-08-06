@@ -370,7 +370,7 @@ const NFTCard = ({
   const shareText = `Just minted ${title} on CheckIn!`;
 
   return (
-    <div className="max-w-[320px] min-w-[250px] h-full">
+    <div className="md:max-w-[320px] min-w-[250px] h-full">
       <Dialog defaultOpen={defaultOpen}>
         <DialogContent
           className="max-w-[600px] w-screen h-[100dvh] px-0 sm:px-6 z-40 max-h-[800px] bg-[#FFF8F0] overflow-y-scroll no-scrollbar"

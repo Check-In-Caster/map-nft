@@ -5,7 +5,8 @@ export const DOMAIN =
     ? `https://${process.env.NEXT_PUBLIC_DOMAIN}`
     : "https://maps.checkin.gg";
 
-export const is_dev = process.env.IS_DEVELOPMENT === "true" ? true : false;
+export const is_dev =
+  process.env.NEXT_PUBLIC_IS_DEVELOPMENT === "true" ? true : false;
 
 export const CHAIN_ID = is_dev ? 84532 : 8453;
 

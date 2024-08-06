@@ -233,13 +233,13 @@ const MapDetailsPage = async ({
 
       {map.eth_amount && !minted && map.wallet_address !== wallet_address ? (
         <>
-          <p className="text-center my-32 text-xl">
+          <p className="text-center my-20 md:my-32 md:text-xl">
             Mint this map to get access to all the places listed on this map.
           </p>
         </>
       ) : (
         <section className="mt-8 md:flex gap-x-5 relative">
-          <div className="flex-1 flex flex-col gap-y-5 w-[150px] h-[670px] overflow-scroll">
+          <div className="flex-1 flex flex-col gap-y-5 md:w-[150px] h-[670px] overflow-scroll">
             {mapPlaces.map((place, i) => (
               <PlaceCard
                 property_id={place.property_id}
