@@ -203,6 +203,7 @@ const MintTransaction = ({
 const NFTCard = ({
   property_id,
   token_id,
+  eth_amount = "0",
   slug,
   edit = false,
   className,
@@ -222,6 +223,7 @@ const NFTCard = ({
   property_id?: string;
   token_id?: number | undefined;
   slug: string;
+  eth_amount?: string | null;
   className?: string;
   edit?: boolean;
   buttonClassName?: string;
@@ -255,7 +257,7 @@ const NFTCard = ({
   const [minted, setMinted] = useState(false);
   const [mintedLoading, setMintLoading] = useState(false);
 
-  const price = 0;
+  const price = eth_amount ? Number(eth_amount) : 0;
 
   const mint = async () => {
     let tokenId = token_id;
@@ -308,7 +310,10 @@ const NFTCard = ({
       }
 
       const priceInWei = ethers.utils.parseUnits(price.toString(), "ether");
-      const multiplier = ethers.utils.parseUnits("0.000777", "ether");
+      const multiplier = ethers.utils.parseUnits(
+        String(Number(eth_amount) + 0.000777),
+        "ether"
+      );
 
       const totalValueInWei = priceInWei.add(multiplier).mul(count);
       const totalValueInBigInt = totalValueInWei.toBigInt();
@@ -401,7 +406,7 @@ const NFTCard = ({
               </div>
               <div>
                 <div className="border border-gray-400 text-center p-3 mt-5">
-                  <p>Free Mint on Base</p>
+                  <p>{price > 0 ? "" : "Free"} Mint on Base</p>
                   {Number(price) > 0 ? (
                     <p className="text-xl font-bold mt-1">{price} ETH</p>
                   ) : (

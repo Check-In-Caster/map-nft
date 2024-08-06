@@ -209,9 +209,10 @@ const AppleMap: React.FC<MapsProps> = ({
             <Marker latitude={coordinates.lat} longitude={coordinates.lng} />
           )}
           {filteredCoordinatesArray
-            ? filteredCoordinatesArray.map((coordinates) => (
+            ? filteredCoordinatesArray.map((coordinates, index) => (
                 <Marker
                   key={`${JSON.stringify(coordinates)}`}
+                  glyphText={String(index + 1)}
                   latitude={coordinates.lat}
                   longitude={coordinates.lng}
                 />

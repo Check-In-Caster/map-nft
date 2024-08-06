@@ -93,6 +93,7 @@ const PlaceCard = ({
 const formSchemaFn = (isEdit?: boolean) => {
   return z.object({
     map_id: z.string().optional(),
+    price: z.string().optional(),
     creator_bio: isEdit ? z.string().optional() : z.string(),
     name: z
       .string()
@@ -134,6 +135,7 @@ const MapForm = ({
   bio?: string | null;
   values?: {
     map_id?: string;
+    price?: string;
     creator_bio?: string;
     name: string;
     thumbnail: string;
@@ -203,8 +205,16 @@ const MapForm = ({
       return;
     }
 
-    const { map_id, name, description, emoji, places, thumbnail, creator_bio } =
-      values;
+    const {
+      map_id,
+      name,
+      description,
+      emoji,
+      places,
+      thumbnail,
+      creator_bio,
+      price,
+    } = values;
 
     const response = map_id
       ? await updateMap({
@@ -223,6 +233,7 @@ const MapForm = ({
           thumbnail,
           places: places,
           creator_bio: creator_bio as string,
+          price,
         });
 
     if (response.status == "error") {
@@ -295,6 +306,23 @@ const MapForm = ({
                         <FormLabel>Creator Bio*</FormLabel>
                         <FormControl>
                           <Textarea {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+
+              {values.map_id ? null : (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Price in ETH</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
                         </FormControl>
                       </FormItem>
                     )}
@@ -386,12 +414,13 @@ const MapForm = ({
                         render={({ field }) => (
                           <FormItem className="mt-5">
                             <FormControl>
-                              <Input
+                              <Textarea
                                 // {...field}
+                                minLength={15}
                                 {...form.register(
                                   `places.${index}.description`
                                 )}
-                                placeholder="Description"
+                                placeholder="Description of the place (min 15 characters)"
                               />
                             </FormControl>
                           </FormItem>

@@ -30,7 +30,8 @@ export const createNewToken = async ({
     maxSupply,
     mintLimit,
     wallet.address,
-    `${tokenURI + nextTokenId}`
+    `${tokenURI + nextTokenId}`,
+    0
   );
 
   return nextTokenId;

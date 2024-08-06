@@ -101,6 +101,7 @@ const MyStats = ({
               return (
                 <NFTCard
                   key={map.map_id}
+                  eth_amount={map.eth_amount}
                   property_id={map.map_id!}
                   userMinted={Number(map.total_minted ?? 0)}
                   token_id={map.token_id ? Number(map.token_id) : undefined}
@@ -131,6 +132,7 @@ const MyStats = ({
               return (
                 <NFTCard
                   key={collected.map.map_id}
+                  eth_amount={collected.map.eth_amount}
                   property_id={collected.map.map_id!}
                   userMinted={Number(collected.map.total_minted ?? 0)}
                   token_id={
@@ -164,6 +166,7 @@ const MyStats = ({
               return (
                 <NFTCard
                   key={like.map.map_id}
+                  eth_amount={like.map.eth_amount}
                   property_id={like.map.map_id!}
                   userMinted={Number(like.map.total_minted ?? 0)}
                   token_id={

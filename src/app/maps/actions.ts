@@ -24,12 +24,14 @@ export async function createMap({
   emoji,
   places,
   creator_bio,
+  price,
 }: {
   name: string;
   description: string;
   thumbnail: string;
   emoji: string;
   creator_bio: string;
+  price?: string;
   places: {
     property_id: string;
     description: string;
@@ -55,6 +57,7 @@ export async function createMap({
       token_id: "",
       wallet_address: wallet_address,
       map_emoji: emoji,
+      eth_amount: price,
       MapsPlaces: {
         createMany: {
           data: places.map(({ property_id, description }) => ({

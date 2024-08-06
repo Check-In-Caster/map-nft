@@ -83,6 +83,7 @@ export default async function Home({
             return (
               <NFTCard
                 key={map.map_id}
+                eth_amount={map.eth_amount}
                 userMinted={Number(map.total_minted ?? 0)}
                 property_id={map.map_id!}
                 token_id={map.token_id ? Number(map.token_id) : undefined}

@@ -13,6 +13,7 @@ const TrendingMaps = ({
           return (
             <NFTCard
               key={map.map_id}
+              eth_amount={map.eth_amount}
               property_id={map.map_id!}
               token_id={map.token_id ? Number(map.token_id) : undefined}
               title={map.name}
