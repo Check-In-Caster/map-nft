@@ -325,7 +325,12 @@ const NFTCard = ({
         chainId: CHAIN_ID,
         abi: mapsABI,
         functionName: "mint",
-        args: [account.address, tokenId, count, refAddress],
+        args: [
+          account.address,
+          tokenId,
+          count,
+          refAddress ?? ethers.constants.AddressZero,
+        ],
         value: totalValueInBigInt,
       });
 
