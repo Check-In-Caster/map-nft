@@ -374,6 +374,7 @@ const NFTCard = ({
             if (disableOutsideInteraction) {
               e.preventDefault();
             }
+            router.refresh();
           }}
         >
           {!minted && (

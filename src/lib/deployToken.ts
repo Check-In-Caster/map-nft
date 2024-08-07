@@ -25,13 +25,14 @@ export const createNewToken = async ({
   const contract = new ethers.Contract(CONTRACT_ADDRESS, mapsABI, signer);
 
   const nextTokenId = await contract.nextTokenId();
+  const amount = ethers.utils.parseEther(String(price));
 
   const _createToken = await contract.createToken(
     maxSupply,
     mintLimit,
     wallet.address,
     `${tokenURI + nextTokenId}`,
-    0
+    amount
   );
 
   return nextTokenId;

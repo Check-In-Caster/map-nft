@@ -71,12 +71,10 @@ export async function deployToken(property_id: string, type?: string) {
     return Number(propertyInfo.token_id);
   }
 
-  const maxInt256 = ethers.constants.MaxUint256.div(2).sub(1);
-
   const tokenId = await createNewToken({
     maxSupply: ethers.constants.MaxUint256,
     mintLimit: ethers.constants.MaxUint256,
-    price: 0,
+    price: propertyInfo?.eth_amount ? Number(propertyInfo?.eth_amount) : 0,
     tokenURI: `${DOMAIN}/api/metadata/`,
   });
 
