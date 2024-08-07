@@ -72,6 +72,7 @@ export async function deployToken(property_id: string, type?: string) {
   }
 
   const tokenId = await createNewToken({
+    wallet_address: propertyInfo?.wallet_address!,
     maxSupply: ethers.constants.MaxUint256,
     mintLimit: ethers.constants.MaxUint256,
     price: propertyInfo?.eth_amount ? Number(propertyInfo?.eth_amount) : 0,
