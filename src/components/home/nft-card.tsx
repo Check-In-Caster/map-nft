@@ -6,7 +6,6 @@ import {
   CONTRACT_ADDRESS,
   DOMAIN,
   EXPLORER_LINK,
-  REF_WALLET_ADDRESS,
   RPC_PROVIDER,
 } from "@/config";
 import { mapsABI } from "@/constants/maps";
@@ -326,12 +325,7 @@ const NFTCard = ({
         chainId: CHAIN_ID,
         abi: mapsABI,
         functionName: "mint",
-        args: [
-          account.address,
-          tokenId,
-          count,
-          refAddress == "" ? REF_WALLET_ADDRESS : refAddress,
-        ],
+        args: [account.address, tokenId, count, refAddress],
         value: totalValueInBigInt,
       });
 
