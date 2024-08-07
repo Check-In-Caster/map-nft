@@ -48,6 +48,19 @@ export async function createMap({
     };
   }
 
+  await prisma.mapsCreator.upsert({
+    where: {
+      wallet_address: wallet_address,
+    },
+    create: {
+      creator_bio: creator_bio,
+      wallet_address: wallet_address,
+    },
+    update: {
+      creator_bio: creator_bio,
+    },
+  });
+
   const map = await prisma.maps.create({
     data: {
       name,
@@ -66,19 +79,6 @@ export async function createMap({
           })),
         },
       },
-    },
-  });
-
-  await prisma.mapsCreator.upsert({
-    where: {
-      wallet_address: wallet_address,
-    },
-    create: {
-      creator_bio: creator_bio,
-      wallet_address: wallet_address,
-    },
-    update: {
-      creator_bio: creator_bio,
     },
   });
 
