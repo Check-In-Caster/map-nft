@@ -305,17 +305,18 @@ const NFTCard = ({
         return;
       }
 
-      const priceInWei = ethers.utils.parseUnits(price.toString(), "ether");
-      const multiplier = ethers.utils.parseUnits(
-        String(Number(eth_amount) + 0.000777),
+      const priceInWei = ethers.utils.parseUnits(
+        (eth_amount ?? 0).toString(),
         "ether"
       );
+      const multiplier = ethers.utils.parseUnits(String(0.000777), "ether");
 
-      const totalValueInWei = priceInWei.add(multiplier).mul(count);
+      const totalValueInWei = priceInWei.add(multiplier).mul(1);
       const totalValueInBigInt = totalValueInWei.toBigInt();
 
       console.log("________________________________");
       console.log("totalValueInBigInt");
+      console.log(eth_amount);
       console.log(totalValueInBigInt);
       console.log(count);
       console.log("________________________________");
@@ -354,10 +355,15 @@ const NFTCard = ({
         spread: 60,
       });
     } catch (e) {
-      toast.error("Transaction rejected!");
-      console.log(e);
       // @ts-ignore
       console.log(e.message);
+
+      // @ts-ignore
+      if (e.message.includes("Insufficient payment")) {
+        toast.error(`You don't have enough ETH on your wallet!`);
+      } else {
+        toast.error("Transaction rejected!");
+      }
     }
     setMintLoading(false);
   };
