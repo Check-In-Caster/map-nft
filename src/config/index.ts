@@ -5,18 +5,14 @@ export const DOMAIN =
     ? `https://${process.env.NEXT_PUBLIC_DOMAIN}`
     : "https://maps.checkin.gg";
 
-// const is_dev = process.env.NODE_ENV === "development";
-const is_dev = true;
+export const is_dev =
+  process.env.NEXT_PUBLIC_IS_DEVELOPMENT === "true" ? true : false;
 
 export const CHAIN_ID = is_dev ? 84532 : 8453;
 
-export const REF_WALLET_ADDRESS = is_dev
-  ? "0xaA4D74cacC47aCAD1a9fd5FD6eD1f81A2E57fA17"
-  : "0xFD8AF1B687Cb42Dc82663a45B78BE2a17C9791E8";
-
 export const CONTRACT_ADDRESS = is_dev
-  ? "0xc6aB671DeAD8a2025B28de1Fb4475ACa2D69d725"
-  : "0xc6aB671DeAD8a2025B28de1Fb4475ACa2D69d725";
+  ? "0xe5fa8c8f7497b94a47ed42778dc508fc0ec3bb79"
+  : (process.env.MAINNET_CONTRACT_ADDRESS! as "0x");
 
 export const RPC_PROVIDER = is_dev
   ? "https://sepolia.base.org"
@@ -25,7 +21,3 @@ export const RPC_PROVIDER = is_dev
 export const EXPLORER_LINK = is_dev
   ? "https://sepolia.basescan.org"
   : "https://basescan.org";
-
-export const baseZoraMinterContractAddress = is_dev
-  ? "0xd34872BE0cdb6b09d45FCa067B07f04a1A9aE1aE"
-  : "0x04E2516A2c207E84a1839755675dfd8eF6302F0a";

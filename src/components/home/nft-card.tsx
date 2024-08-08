@@ -6,7 +6,6 @@ import {
   CONTRACT_ADDRESS,
   DOMAIN,
   EXPLORER_LINK,
-  REF_WALLET_ADDRESS,
   RPC_PROVIDER,
 } from "@/config";
 import { mapsABI } from "@/constants/maps";
@@ -24,10 +23,6 @@ import { toast } from "sonner";
 import { useAccount, useWriteContract } from "wagmi";
 import CostBreakdown from "../ui/cost-breakdown";
 import Quantity from "../ui/quanitity";
-
-function capitalizeFirstLetter(string: string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
 
 const MintTransaction = ({
   title,
@@ -203,6 +198,7 @@ const MintTransaction = ({
 const NFTCard = ({
   property_id,
   token_id,
+  eth_amount = "0",
   slug,
   edit = false,
   className,
@@ -222,6 +218,7 @@ const NFTCard = ({
   property_id?: string;
   token_id?: number | undefined;
   slug: string;
+  eth_amount?: string | null;
   className?: string;
   edit?: boolean;
   buttonClassName?: string;
@@ -255,7 +252,7 @@ const NFTCard = ({
   const [minted, setMinted] = useState(false);
   const [mintedLoading, setMintLoading] = useState(false);
 
-  const price = 0;
+  const price = eth_amount ? Number(eth_amount) : 0;
 
   const mint = async () => {
     let tokenId = token_id;
@@ -307,14 +304,18 @@ const NFTCard = ({
         return;
       }
 
-      const priceInWei = ethers.utils.parseUnits(price.toString(), "ether");
-      const multiplier = ethers.utils.parseUnits("0.000777", "ether");
+      const priceInWei = ethers.utils.parseUnits(
+        (eth_amount ?? 0).toString(),
+        "ether"
+      );
+      const multiplier = ethers.utils.parseUnits(String(0.000777), "ether");
 
-      const totalValueInWei = priceInWei.add(multiplier).mul(count);
+      const totalValueInWei = priceInWei.add(multiplier).mul(1);
       const totalValueInBigInt = totalValueInWei.toBigInt();
 
       console.log("________________________________");
       console.log("totalValueInBigInt");
+      console.log(eth_amount);
       console.log(totalValueInBigInt);
       console.log(count);
       console.log("________________________________");
@@ -328,7 +329,7 @@ const NFTCard = ({
           account.address,
           tokenId,
           count,
-          refAddress == "" ? REF_WALLET_ADDRESS : refAddress,
+          refAddress ?? ethers.constants.AddressZero,
         ],
         value: totalValueInBigInt,
       });
@@ -353,10 +354,15 @@ const NFTCard = ({
         spread: 60,
       });
     } catch (e) {
-      toast.error("Transaction rejected!");
-      console.log(e);
       // @ts-ignore
       console.log(e.message);
+
+      // @ts-ignore
+      if (e.message.includes("Insufficient payment")) {
+        toast.error(`You don't have enough ETH on your wallet!`);
+      } else {
+        toast.error("Transaction rejected!");
+      }
     }
     setMintLoading(false);
   };
@@ -365,7 +371,7 @@ const NFTCard = ({
   const shareText = `Just minted ${title} on CheckIn!`;
 
   return (
-    <div className="max-w-[320px] min-w-[250px] h-full">
+    <div className="md:max-w-[320px] min-w-[250px] h-full">
       <Dialog defaultOpen={defaultOpen}>
         <DialogContent
           className="max-w-[600px] w-screen h-[100dvh] px-0 sm:px-6 z-40 max-h-[800px] bg-[#FFF8F0] overflow-y-scroll no-scrollbar"
@@ -373,6 +379,7 @@ const NFTCard = ({
             if (disableOutsideInteraction) {
               e.preventDefault();
             }
+            router.refresh();
           }}
         >
           {!minted && (
@@ -401,7 +408,7 @@ const NFTCard = ({
               </div>
               <div>
                 <div className="border border-gray-400 text-center p-3 mt-5">
-                  <p>Free Mint on Base</p>
+                  <p>{price > 0 ? "" : "Free"} Mint on Base</p>
                   {Number(price) > 0 ? (
                     <p className="text-xl font-bold mt-1">{price} ETH</p>
                   ) : (

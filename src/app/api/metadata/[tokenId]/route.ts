@@ -22,48 +22,23 @@ export async function GET(
     );
   }
 
-  const getToken = await prisma.propertyInfo.findFirst({
+  const getToken = await prisma.maps.findFirst({
     where: {
-      token_id: Number(tokenId),
-    },
-    include: {
-      Locations: true,
+      token_id: String(tokenId),
     },
   });
 
-  const image = `${DOMAIN}/api/image/` + getToken?.property_id;
+  const image = `${DOMAIN}/api/image/` + getToken?.map_id;
 
   if (getToken) {
     return new Response(
       JSON.stringify({
-        name: `Fan of ${getToken.Locations?.location}`,
-        description: `${getToken.Locations?.category} in ${getToken.Locations?.country}
-${getToken.Locations?.map_url}`,
+        name: `${getToken.name}`,
+        description: `${getToken.description}`,
         image: `${image}`,
         imageURI: `${image}`,
         external_url: `${DOMAIN}`,
-        attributes: [
-          {
-            trait_type: "score",
-            value: getToken.score,
-          },
-          {
-            trait_type: "country",
-            value: getToken.Locations?.country,
-          },
-          {
-            trait_type: "category",
-            value: getToken.Locations?.category,
-          },
-          {
-            trait_type: "coordinates",
-            value: JSON.stringify(getToken.Locations?.coordinates),
-          },
-          {
-            trait_type: "map",
-            value: JSON.stringify(getToken.Locations?.map_url),
-          },
-        ],
+        attributes: [],
       })
     );
   }

@@ -3,6 +3,7 @@ import { mapsABI } from "@/constants/maps";
 import { BigNumber, ethers } from "ethers";
 
 export const createNewToken = async ({
+  wallet_address,
   maxSupply,
   price,
   tokenURI,
@@ -10,6 +11,7 @@ export const createNewToken = async ({
 }: {
   maxSupply: number | BigNumber;
   price: number;
+  wallet_address: string;
   tokenURI: string;
   mintLimit: Number | BigNumber;
 }) => {
@@ -25,12 +27,13 @@ export const createNewToken = async ({
   const contract = new ethers.Contract(CONTRACT_ADDRESS, mapsABI, signer);
 
   const nextTokenId = await contract.nextTokenId();
+  const amount = ethers.utils.parseEther(String(price));
 
   const _createToken = await contract.createToken(
     maxSupply,
     mintLimit,
-    wallet.address,
-    `${tokenURI + nextTokenId}`
+    wallet_address,
+    amount
   );
 
   return nextTokenId;

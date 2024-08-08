@@ -325,7 +325,7 @@ export const mapsABI = [
       { internalType: "uint256", name: "maxSupply", type: "uint256" },
       { internalType: "uint256", name: "mintLimit", type: "uint256" },
       { internalType: "address", name: "creator", type: "address" },
-      { internalType: "string", name: "tokenUri", type: "string" },
+      { internalType: "uint256", name: "price", type: "uint256" },
     ],
     name: "createToken",
     outputs: [],

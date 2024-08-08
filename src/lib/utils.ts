@@ -27,9 +27,9 @@ export const isValidEthAddress = (address: string) => {
       const wallet = getAddress(address);
       return wallet;
     } else {
-      return "";
+      return null;
     }
   } catch (e) {
-    return "";
+    return null;
   }
 };

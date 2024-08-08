@@ -1,12 +1,12 @@
-import HeroSection from "@/components/home/hero-section";
 import NFTCard from "@/components/home/nft-card";
-import TrendingMaps from "@/components/home/trending-maps";
 import Heading from "@/components/ui/heading";
+import Pagination from "@/components/ui/pagination";
 import { prisma } from "@/lib/prisma";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
-const getData = async (propertyId: string, secret: string) => {
+const getData = async (secret: string, page: number) => {
+  const limit = 12;
+
   const settings = await prisma.settings.findFirst({
     where: {
       name: "map_maintenance",
@@ -19,6 +19,8 @@ const getData = async (propertyId: string, secret: string) => {
     return redirect("/maintenance");
   }
 
+  const offset = ((page ?? 1) - 1) * limit;
+
   const trendingMaps = await prisma.maps.findMany({
     orderBy: {
       total_minted: "desc",
@@ -26,32 +28,15 @@ const getData = async (propertyId: string, secret: string) => {
     include: {
       MapsCreator: true,
     },
-    take: 4,
+    take: limit,
+    skip: offset,
   });
 
-  const featuredMaps = await prisma.maps.findMany({
-    where: {
-      map_id: {
-        in: [
-          "557b7107-f020-493b-9c01-483b49876bcf",
-          "5cca9abb-5d94-471c-8277-55b3cab5f72b",
-          "80f8ee6e-1645-4557-85a9-97bc36a073b5",
-          "91ddd21c-96b5-412f-ba85-8872b1f4ce12",
-        ],
-      },
-    },
-    include: {
-      MapsCreator: true,
-    },
-    orderBy: {
-      total_minted: "desc",
-    },
-    take: 4,
-  });
+  const totalMaps = await prisma.maps.count();
 
   return {
     trendingMaps,
-    featuredMaps,
+    totalMaps,
   };
 };
 
@@ -60,26 +45,17 @@ export default async function Home({
 }: {
   searchParams: Record<string, string>;
 }) {
-  const { trendingMaps, featuredMaps } = await getData(
-    searchParams.property,
+  const { trendingMaps, totalMaps } = await getData(
     searchParams.secret,
+    Number(searchParams?.page ?? 1)
   );
 
   return (
     <>
-      <HeroSection />
-      <div className="mx-auto mb-8 mt-8 max-w-7xl p-2 md:p-0">
-        <Heading label="Trending Maps" />
+      <div className="mt-8 max-w-7xl mx-auto mb-8 p-2 md:p-0">
+        <Heading label="Maps" />
 
-        {trendingMaps?.length === 0 && (
-          <div className="mt-10 flex items-center justify-center">
-            <p className="text-xl font-semibold text-gray-500">
-              No Trending Maps!
-            </p>
-          </div>
-        )}
-
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
           {trendingMaps?.map((map) => {
             return (
               <NFTCard
@@ -104,17 +80,7 @@ export default async function Home({
           })}
         </div>
 
-        <div className="mt-10 grid place-items-center text-center">
-          <Link
-            href="/maps"
-            className="mt-7 inline bg-[#0067D9] px-6 py-2 text-lg tracking-wider text-white"
-          >
-            View all maps
-          </Link>
-        </div>
-
-        <Heading label="Tokyo Maps" />
-        <TrendingMaps maps={featuredMaps} />
+        <Pagination totalMaps={totalMaps} />
       </div>
     </>
   );
