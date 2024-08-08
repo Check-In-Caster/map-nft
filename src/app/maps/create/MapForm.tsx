@@ -17,13 +17,17 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import { CHAIN_ID, CONTRACT_ADDRESS } from "@/config";
+import { mapsABI } from "@/constants/maps";
 import { zodResolver } from "@hookform/resolvers/zod";
 import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
+import { ethers } from "ethers";
 import { PlusIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useAccount, useWriteContract } from "wagmi";
 import { z } from "zod";
 import { createMap, getLocationsInfo, updateMap } from "../actions";
 
@@ -149,6 +153,9 @@ const MapForm = ({
   };
 }) => {
   const [freeOption, setFreeOption] = useState(true);
+  const { writeContractAsync, data } = useWriteContract();
+  const account = useAccount();
+
   const router = useRouter();
   const [placesMap, setPlacesMap] = useState<
     Map<
@@ -202,6 +209,11 @@ const MapForm = ({
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!account.address) {
+      toast.error("Connect wallet to continue");
+      return;
+    }
+
     if (values.thumbnail === "" && values.emoji === "") {
       toast.error("Please upload a thumbnail or select an emoji");
       return;
@@ -218,6 +230,40 @@ const MapForm = ({
       price,
     } = values;
 
+    let txHash = null;
+
+    if (!map_id) {
+      const amount =
+        price && Number(price) != 0
+          ? ethers.utils.parseEther(String(price))
+          : 0;
+
+      const priceInWei = ethers.utils.parseUnits((0).toString(), "ether");
+
+      const _mint = await writeContractAsync({
+        address: CONTRACT_ADDRESS!,
+        chainId: CHAIN_ID,
+        abi: mapsABI,
+        functionName: "createToken",
+        args: [
+          ethers.constants.MaxUint256,
+          ethers.constants.MaxUint256,
+          account.address,
+          amount,
+        ],
+        value: ethers.utils.parseUnits((0).toString(), "ether").toBigInt(),
+      });
+
+      if (_mint) {
+        txHash = _mint;
+      }
+
+      if (_mint == null) {
+        toast.error("Failed to create token id");
+        return;
+      }
+    }
+
     const response = map_id
       ? await updateMap({
           map_id,
@@ -233,6 +279,8 @@ const MapForm = ({
           emoji: emoji,
           name: name,
           thumbnail,
+          txHash: String(txHash),
+          owner_address: account.address,
           places: places,
           creator_bio: creator_bio as string,
           price,

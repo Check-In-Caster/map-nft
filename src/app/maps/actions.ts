@@ -1,7 +1,9 @@
 "use server";
 
+import { RPC_PROVIDER } from "@/config";
 import { getFarcasterAccount } from "@/lib/airstack";
 import { prisma } from "@/lib/prisma";
+import { ethers } from "ethers";
 import { getServerSession } from "next-auth";
 const AWS = require("aws-sdk");
 
@@ -20,18 +22,22 @@ function generateSlug(name: string) {
 export async function createMap({
   name,
   thumbnail,
+  owner_address,
   description,
   emoji,
   places,
   creator_bio,
+  txHash,
   price,
 }: {
   name: string;
   description: string;
+  owner_address: string;
   thumbnail: string;
   emoji: string;
   creator_bio: string;
   price?: string;
+  txHash?: string;
   places: {
     property_id: string;
     description: string;
@@ -39,12 +45,13 @@ export async function createMap({
 }) {
   const session = await getServerSession();
 
-  const wallet_address = session?.user?.name?.toLocaleLowerCase() ?? "";
+  const wallet_address =
+    session?.user?.name?.toLocaleLowerCase() ?? owner_address;
 
-  if (!wallet_address) {
+  if (!txHash) {
     return {
       status: "error",
-      message: "Please connect wallet to continue",
+      message: "Invalid Transaction",
     };
   }
 
@@ -61,13 +68,65 @@ export async function createMap({
     },
   });
 
+  const provider = new ethers.providers.JsonRpcProvider({
+    url: RPC_PROVIDER,
+    skipFetchSetup: true,
+  });
+
+  const txinfo = await provider.getTransactionReceipt(txHash);
+  let token_id = null;
+
+  try {
+    const tx = txinfo.logs[1];
+    const decode = ethers.utils.defaultAbiCoder.decode(
+      [
+        "uint256",
+        "uint256",
+        "uint256",
+        "uint256",
+        "uint256",
+        "uint256",
+        "uint256",
+        "uint256",
+        "uint256",
+      ],
+      tx.data
+    );
+    token_id = String(Number(decode[0]));
+  } catch (e) {
+    return {
+      status: "error",
+      message: "Oops! something went wrong!",
+    };
+  }
+
+  if (!token_id) {
+    return {
+      status: "error",
+      message: "Invalid Transaction",
+    };
+  }
+
+  const tokenExist = await prisma.maps.findFirst({
+    where: {
+      token_id: token_id,
+    },
+  });
+
+  if (tokenExist) {
+    return {
+      status: "error",
+      message: "Map already created!",
+    };
+  }
+
   const map = await prisma.maps.create({
     data: {
       name,
       description,
       slug: generateSlug(name),
       thumbnail: thumbnail,
-      token_id: "",
+      token_id: token_id ?? "",
       wallet_address: wallet_address,
       map_emoji: emoji,
       eth_amount: price,
