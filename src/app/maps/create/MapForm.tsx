@@ -17,7 +17,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
-import { CHAIN_ID, CONTRACT_ADDRESS } from "@/config";
+import { CHAIN_ID, CONTRACT_ADDRESS, RPC_PROVIDER } from "@/config";
 import { mapsABI } from "@/constants/maps";
 import { zodResolver } from "@hookform/resolvers/zod";
 import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
@@ -118,6 +118,27 @@ const formSchemaFn = (isEdit?: boolean) => {
   });
 };
 
+async function checkTransaction(txHash: string, interval = 4000) {
+  const provider = new ethers.providers.JsonRpcProvider(RPC_PROVIDER);
+
+  while (true) {
+    try {
+      const receipt = await provider.getTransactionReceipt(txHash);
+
+      if (receipt.status === 1) {
+        return true;
+      } else if (receipt.status === 0) {
+        toast.error("Transaction reverted");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error checking transaction:", error);
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, interval));
+  }
+}
+
 const MapForm = ({
   heading = "Create a map",
   buttonText = "Create a map",
@@ -152,6 +173,7 @@ const MapForm = ({
     }[];
   };
 }) => {
+  const [loading, setLoading] = useState(false);
   const [freeOption, setFreeOption] = useState(true);
   const { writeContractAsync, data } = useWriteContract();
   const account = useAccount();
@@ -231,14 +253,15 @@ const MapForm = ({
     } = values;
 
     let txHash = null;
+    setLoading(true);
 
     if (!map_id) {
+      toast.info("Cofirm the transaction to create NFT");
+
       const amount =
         price && Number(price) != 0
           ? ethers.utils.parseEther(String(price))
           : 0;
-
-      const priceInWei = ethers.utils.parseUnits((0).toString(), "ether");
 
       const _mint = await writeContractAsync({
         address: CONTRACT_ADDRESS!,
@@ -260,6 +283,12 @@ const MapForm = ({
 
       if (_mint == null) {
         toast.error("Failed to create token id");
+        setLoading(false);
+        return;
+      }
+
+      if (!(await checkTransaction(_mint))) {
+        setLoading(false);
         return;
       }
     }
@@ -286,6 +315,7 @@ const MapForm = ({
           price,
         });
 
+    setLoading(false);
     if (response.status == "error") {
       toast.error(response.message);
     } else {
@@ -522,9 +552,10 @@ const MapForm = ({
               </div>
               <button
                 type="submit"
+                disabled={loading}
                 className="bg-[#5844C1] min-h-[48px] w-full grid place-items-center connect-wallet text-[#fff]"
               >
-                {buttonText}
+                {loading ? "Loading..." : buttonText}
               </button>
             </form>
           </FormProvider>
