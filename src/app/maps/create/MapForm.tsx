@@ -57,17 +57,17 @@ const PlaceCard = ({
 
   return (
     <>
-      <div className="flex mt-4 gap-x-6">
+      <div className="mt-4 flex gap-x-6">
         {location ? (
           <div>
             <img
               src={location?.image ?? "https://via.placeholder.com/96"}
-              alt="place"
-              className="rounded w-24 aspect-square object-cover"
+              alt=""
+              className="aspect-square w-24 rounded object-cover"
             />
           </div>
         ) : null}
-        <div className="w-full relative">
+        <div className="relative w-full">
           {location ? (
             <>
               <div className="text-xl">{location.name}</div>
@@ -76,7 +76,7 @@ const PlaceCard = ({
                 <img
                   src="/assets/icons/ratings.svg"
                   alt=""
-                  className="inline pr-4 pl-1"
+                  className="inline pl-1 pr-4"
                 />
               </div>
               <div className="font-light">{location.category}</div>
@@ -112,7 +112,7 @@ const formSchemaFn = (isEdit?: boolean) => {
         z.object({
           property_id: z.string(),
           description: z.string(),
-        })
+        }),
       )
       .min(1, { message: "You must add at least one place" }),
   });
@@ -256,38 +256,56 @@ const MapForm = ({
     setLoading(true);
 
     if (!map_id) {
-      toast.info("Cofirm the transaction to create NFT");
+      toast.info("Confirm the transaction to create NFT");
 
       const amount =
         price && Number(price) != 0
           ? ethers.utils.parseEther(String(price))
           : 0;
 
-      const _mint = await writeContractAsync({
-        address: CONTRACT_ADDRESS!,
-        chainId: CHAIN_ID,
-        abi: mapsABI,
-        functionName: "createToken",
-        args: [
-          ethers.constants.MaxUint256,
-          ethers.constants.MaxUint256,
-          account.address,
-          amount,
-        ],
-        value: ethers.utils.parseUnits((0).toString(), "ether").toBigInt(),
-      });
+      try {
+        const _mint = await writeContractAsync({
+          address: CONTRACT_ADDRESS!,
+          chainId: CHAIN_ID,
+          abi: mapsABI,
+          functionName: "createToken",
+          args: [
+            ethers.constants.MaxUint256,
+            ethers.constants.MaxUint256,
+            account.address,
+            amount,
+          ],
+          value: ethers.utils.parseUnits((0).toString(), "ether").toBigInt(),
+        });
 
-      if (_mint) {
-        txHash = _mint;
-      }
+        if (_mint) {
+          txHash = _mint;
+        }
 
-      if (_mint == null) {
-        toast.error("Failed to create token id");
-        setLoading(false);
-        return;
-      }
+        if (_mint == null) {
+          toast.error("Failed to create token id");
+          setLoading(false);
+          return;
+        }
 
-      if (!(await checkTransaction(_mint))) {
+        if (!(await checkTransaction(_mint))) {
+          setLoading(false);
+          return;
+        }
+      } catch (e: unknown) {
+        console.log(e);
+
+        if (typeof e === "object" && e !== null && "message" in e) {
+          const error = e as Error;
+          if (error.message.includes("User denied transaction signature")) {
+            toast.error("User rejected the transaction");
+          } else {
+            toast.error("Failed to create token id");
+          }
+        } else {
+          console.error("Unexpected error:", e);
+        }
+
         setLoading(false);
         return;
       }
@@ -320,7 +338,7 @@ const MapForm = ({
       toast.error(response.message);
     } else {
       toast.success(
-        map_id ? "Map updated successfully" : "Map created successfully"
+        map_id ? "Map updated successfully" : "Map created successfully",
       );
 
       // redirect to the map page
@@ -331,9 +349,9 @@ const MapForm = ({
   const emojiValue = form.watch("emoji");
 
   return (
-    <div className="mt-8 w-full max-w-7xl mx-auto mb-8 p-4 md:p-0">
-      <div className="text-center text-2xl md:text-4xl my-10">{heading}</div>
-      <div className="grid md:grid-cols-2 gap-10 mt-24">
+    <div className="mx-auto mb-8 mt-8 w-full max-w-7xl p-4 md:p-0">
+      <div className="my-10 text-center text-2xl md:text-4xl">{heading}</div>
+      <div className="mt-24 grid gap-10 md:grid-cols-2">
         <div className="space-y-5">
           <FormProvider {...form}>
             <form
@@ -350,7 +368,7 @@ const MapForm = ({
                       <Input {...field} />
                     </FormControl>
                     {form.formState.errors.name && (
-                      <div className="text-red-500 text-sm">
+                      <div className="text-sm text-red-500">
                         {form.formState.errors.name.message}
                       </div>
                     )}
@@ -368,7 +386,7 @@ const MapForm = ({
                       <Textarea {...field} />
                     </FormControl>
                     {form.formState.errors.description && (
-                      <div className="text-red-500 text-sm">
+                      <div className="text-sm text-red-500">
                         {form.formState.errors.description.message}
                       </div>
                     )}
@@ -396,11 +414,11 @@ const MapForm = ({
               {values.map_id ? null : (
                 <div className="relative">
                   <div className="absolute right-0">
-                    <label className="inline-flex items-center cursor-pointer">
+                    <label className="inline-flex cursor-pointer items-center">
                       <input
                         type="checkbox"
                         value=""
-                        className="sr-only peer"
+                        className="peer sr-only"
                         checked={freeOption}
                         onChange={() => {
                           setFreeOption(!freeOption);
@@ -410,7 +428,7 @@ const MapForm = ({
                           }
                         }}
                       />
-                      <div className="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#5844C1]"></div>
+                      <div className="peer relative h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-[#5844C1] peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-blue-800 rtl:peer-checked:after:-translate-x-full"></div>
                       <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
                         Free
                       </span>
@@ -451,7 +469,7 @@ const MapForm = ({
 
                     <Button type="button" variant="outline">
                       {emojiValue ? (
-                        <img src={emojiValue} className="w-6 h-6 mr-4" />
+                        <img src={emojiValue} className="mr-4 h-6 w-6" />
                       ) : null}
                       Select Emoji
                     </Button>
@@ -492,7 +510,7 @@ const MapForm = ({
                             });
 
                             const newPlacesMap = new Map(
-                              JSON.parse(JSON.stringify(Array.from(placesMap)))
+                              JSON.parse(JSON.stringify(Array.from(placesMap))),
                             ) as typeof placesMap;
                             newPlacesMap.set(property.property_id, {
                               name: property.Locations.location ?? "",
@@ -520,7 +538,7 @@ const MapForm = ({
                                 // {...field}
                                 minLength={15}
                                 {...form.register(
-                                  `places.${index}.description`
+                                  `places.${index}.description`,
                                 )}
                                 placeholder="Description of the place (min 15 characters)"
                               />
@@ -533,7 +551,7 @@ const MapForm = ({
                 ))}
 
                 <a
-                  className="mt-8 flex items-center cursor-pointer"
+                  className="mt-8 flex cursor-pointer items-center"
                   onClick={() => {
                     append({
                       description: "",
@@ -545,7 +563,7 @@ const MapForm = ({
                   Add a Place
                 </a>
                 {form.formState.errors.places && (
-                  <div className="text-red-500 text-sm mt-2">
+                  <div className="mt-2 text-sm text-red-500">
                     {form.formState.errors.places.message}
                   </div>
                 )}
@@ -553,14 +571,14 @@ const MapForm = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-[#5844C1] min-h-[48px] w-full grid place-items-center connect-wallet text-[#fff]"
+                className="connect-wallet grid min-h-[48px] w-full place-items-center bg-[#5844C1] text-[#fff]"
               >
                 {loading ? "Loading..." : buttonText}
               </button>
             </form>
           </FormProvider>
         </div>
-        <div className="grid place-items-center max-h-[800px]">
+        <div className="grid max-h-[800px] place-items-center">
           <AppleMap
             token={mapToken}
             coordinatesArray={(() => {

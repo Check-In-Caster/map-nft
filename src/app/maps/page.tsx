@@ -9,7 +9,7 @@ const getData = async (secret: string, page: number) => {
 
   const settings = await prisma.settings.findFirst({
     where: {
-      name: "property_maintenance",
+      name: "map_maintenance",
     },
   });
 

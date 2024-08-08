@@ -6,11 +6,11 @@ import MyStats from "./StatsPage";
 const getProperties = async (
   wallet_address: string,
   profileTokenId?: number,
-  secret?: string
+  secret?: string,
 ) => {
   const settings = await prisma.settings.findFirst({
     where: {
-      name: "property_maintenance",
+      name: "map_maintenance",
     },
   });
 
@@ -88,7 +88,7 @@ const Page = async ({
   const { checkInCount, stats, maps } = await getProperties(
     walletAddress ?? "",
     profile?.profileTokenId ?? null,
-    searchParams.secret
+    searchParams.secret,
   );
 
   return (

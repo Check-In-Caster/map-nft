@@ -9,7 +9,7 @@ import { redirect } from "next/navigation";
 const getData = async (propertyId: string, secret: string) => {
   const settings = await prisma.settings.findFirst({
     where: {
-      name: "property_maintenance",
+      name: "map_maintenance",
     },
   });
 
@@ -62,24 +62,24 @@ export default async function Home({
 }) {
   const { trendingMaps, featuredMaps } = await getData(
     searchParams.property,
-    searchParams.secret
+    searchParams.secret,
   );
 
   return (
     <>
       <HeroSection />
-      <div className="mt-8 max-w-7xl mx-auto mb-8 p-2 md:p-0">
+      <div className="mx-auto mb-8 mt-8 max-w-7xl p-2 md:p-0">
         <Heading label="Trending Maps" />
 
         {trendingMaps?.length === 0 && (
-          <div className="flex items-center justify-center mt-10">
+          <div className="mt-10 flex items-center justify-center">
             <p className="text-xl font-semibold text-gray-500">
               No Trending Maps!
             </p>
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
           {trendingMaps?.map((map) => {
             return (
               <NFTCard
@@ -104,10 +104,10 @@ export default async function Home({
           })}
         </div>
 
-        <div className="grid place-items-center text-center mt-10">
+        <div className="mt-10 grid place-items-center text-center">
           <Link
             href="/maps"
-            className="inline bg-[#0067D9] text-white mt-7 text-lg px-6 py-2 tracking-wider"
+            className="mt-7 inline bg-[#0067D9] px-6 py-2 text-lg tracking-wider text-white"
           >
             View all maps
           </Link>
