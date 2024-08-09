@@ -55,7 +55,9 @@ const Applayout = ({
           <RainbowKitSiweNextAuthProvider
             getSiweMessageOptions={getSiweMessageOptions}
           >
-            <RainbowKitProvider initialChain={base.id}>
+            <RainbowKitProvider
+              initialChain={is_dev ? baseSepolia.id : base.id}
+            >
               <div className="bg-custom-gray-30 pb-8 text-[#000]">
                 {pathName !== "/maintenance" ? (
                   <>
