@@ -151,7 +151,7 @@ export async function createMap({
   return {
     status: "success",
     message: "Map created successfully",
-    slug: map.s,
+    slug: map.slug,
   };
 }
 
