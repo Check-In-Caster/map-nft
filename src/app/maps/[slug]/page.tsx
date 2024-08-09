@@ -8,6 +8,7 @@ import { Lexend } from "next/font/google";
 import Image from "next/image";
 
 import { getServerSession } from "next-auth";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import EditMapButton from "./EditMapButton";
 import LikeMap from "./LikeMap";
@@ -41,16 +42,16 @@ const PlaceCard = ({
 
   return (
     <>
-      <div className="flex flex-col items-center bg-white py-10 shadow-md space-y-5">
+      <div className="flex flex-col items-center space-y-5 bg-white py-10 shadow-md">
         <a href={map_url} target="_BLANK" className="text-xl">
           <img
             src={image}
             alt="place"
-            className="rounded w-[220px] h-[220px]"
+            className="h-[220px] w-[220px] rounded"
           />
         </a>
 
-        <div className="relative flex flex-col text-center space-y-2 flex-1">
+        <div className="relative flex flex-1 flex-col space-y-2 text-center">
           <a href={map_url} target="_BLANK" className="text-xl">
             {name}
           </a>
@@ -60,17 +61,17 @@ const PlaceCard = ({
             <img
               src="/assets/icons/ratings.svg"
               alt=""
-              className="inline pr-4 pl-1"
+              className="inline pl-1 pr-4"
             />
           </div>
-          <div className="font-thin text-center text-gray-500">{category}</div>
-          <div className="font-thin text-center w-[260px] my-4">
+          <div className="text-center font-thin text-gray-500">{category}</div>
+          <div className="my-4 w-[260px] text-center font-thin">
             {placeDescription ? `" ${placeDescription} "` : null}
           </div>
           <a
             href={propertyLink}
             target="_blank"
-            className="bg-white text-center border border-[#5844C1]  py-1.5  block mt-8"
+            className="mt-8 block border border-[#5844C1]  bg-white  py-1.5 text-center"
           >
             Mint Place
           </a>
@@ -139,13 +140,13 @@ const MapDetailsPage = async ({
 
   // sorting the mapPlaces array based on the order of the map.MapsPlaces array
   const mapPlacesMap = new Map(
-    mapPlaces.map((place) => [place.property_id, place])
+    mapPlaces.map((place) => [place.property_id, place]),
   );
   mapPlaces = [];
   for (const place of map.MapsPlaces) {
     if (mapPlacesMap.has(place.property_id)) {
       mapPlaces.push(
-        mapPlacesMap.get(place.property_id) as (typeof mapPlaces)[number]
+        mapPlacesMap.get(place.property_id) as (typeof mapPlaces)[number],
       );
     }
   }
@@ -162,30 +163,34 @@ const MapDetailsPage = async ({
   });
 
   return (
-    <div className="mt-8 max-w-7xl mx-auto mb-8 p-2 md:p-0">
+    <div className="mx-auto mb-8 mt-8 max-w-7xl p-2 md:p-0">
       <section className="flex justify-between">
         <div>
           <h1 className="text-4xl">{map?.name}</h1>
           <OSFont
             as="h2"
             defaultFont="lexend"
-            className="text-xl mt-2 font-light tracking-normal"
+            className="mt-2 text-xl font-light tracking-normal"
           >
             {map?.description}
           </OSFont>
 
-          <div className="flex gap-2 items-center mt-6">
+          <Link
+            href={`/my-maps/${map.wallet_address}`}
+            passHref
+            className="mt-6 flex items-center gap-2"
+          >
             <Image
               src={creator?.profile_image ?? "https://i.imgur.com/yZOyUGG.png"}
               alt={creator?.name ?? ""}
               height={28}
               width={28}
-              className="rounded-full h-7 w-7 object-cover"
+              className="h-7 w-7 rounded-full object-cover"
             />
             <span className="text-sm">
               {creator.name ?? shortenAddress(map?.wallet_address ?? "")}
             </span>
-          </div>
+          </Link>
 
           <div
             className={`${lexend.className} mt-2 font-light tracking-normal`}
@@ -224,7 +229,7 @@ const MapDetailsPage = async ({
             />
           </div>
         </div>
-        <div className="flex flex-col md:flex-row gap-4 items-start">
+        <div className="flex flex-col items-start gap-4 md:flex-row">
           <LikeMap map_id={map.map_id} liked={liked ? true : false} />
 
           <ShareMap slug={map.slug} />
@@ -233,13 +238,13 @@ const MapDetailsPage = async ({
 
       {map.eth_amount && !minted && map.wallet_address !== wallet_address ? (
         <>
-          <p className="text-center my-20 md:my-32 md:text-xl">
+          <p className="my-20 text-center md:my-32 md:text-xl">
             Mint this map to get access to all the places listed on this map.
           </p>
         </>
       ) : (
-        <section className="mt-8 md:flex gap-x-5 relative">
-          <div className="flex-1 flex flex-col gap-y-5 md:w-[150px] h-[670px] overflow-scroll">
+        <section className="relative mt-8 gap-x-5 md:flex">
+          <div className="flex h-[670px] flex-1 flex-col gap-y-5 overflow-scroll md:w-[150px]">
             {mapPlaces.map((place, i) => (
               <PlaceCard
                 property_id={place.property_id}
@@ -261,7 +266,7 @@ const MapDetailsPage = async ({
             ))}
           </div>
 
-          <div className="flex-[2] min-h-96 sticky">
+          <div className="sticky min-h-96 flex-[2]">
             <AppleMap token={mapToken} coordinatesArray={mapCoordinates} />
           </div>
         </section>
