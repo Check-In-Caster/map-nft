@@ -9,7 +9,7 @@ export async function GET(
     params: {
       propertyId: string;
     };
-  }
+  },
 ) {
   const map = await prisma.maps.findFirst({
     where: {
@@ -27,12 +27,12 @@ export async function GET(
   const imageResponse = new ImageResponse(
     (
       <div
-        tw="flex h-full"
+        tw="flex h-full w-full"
         style={{
           ...(map.thumbnail
             ? {
                 backgroundImage: `url(${map.thumbnail})`,
-                objectFit: "cover",
+                backgroundSize: "cover",
               }
             : {}),
         }}
@@ -90,7 +90,7 @@ export async function GET(
       headers: {
         "Cache-Control": "public, max-age=86400, immutable",
       },
-    }
+    },
   );
 
   return imageResponse;

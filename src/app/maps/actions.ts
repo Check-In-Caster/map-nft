@@ -55,6 +55,9 @@ export async function createMap({
     };
   }
 
+  const farcasterProfile =
+    wallet_address != "" ? await getFarcasterAccount(wallet_address) : null;
+
   await prisma.mapsCreator.upsert({
     where: {
       wallet_address: wallet_address,
@@ -62,9 +65,13 @@ export async function createMap({
     create: {
       creator_bio: creator_bio,
       wallet_address: wallet_address,
+      name: farcasterProfile?.profileName ?? "",
+      profile_image: farcasterProfile?.profileImage ?? "",
     },
     update: {
       creator_bio: creator_bio,
+      name: farcasterProfile?.profileName ?? "",
+      profile_image: farcasterProfile?.profileImage ?? "",
     },
   });
 
@@ -90,7 +97,7 @@ export async function createMap({
         "uint256",
         "uint256",
       ],
-      tx.data
+      tx.data,
     );
     token_id = String(Number(decode[0]));
   } catch (e) {

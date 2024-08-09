@@ -76,13 +76,13 @@ const MintTransaction = ({
   }, [hash]);
 
   return (
-    <div className="flex flex-col justify-center items-center py-5 pt-5 bg-scroll">
+    <div className="flex flex-col items-center justify-center bg-scroll py-5 pt-5">
       <div className="min-w-[300px]">
         {pending ? (
           <>
             <div className="text-center">
-              <p className="text-center font-bold text-xl">Pending...</p>
-              <p className="text-center font-medium mt-2">
+              <p className="text-center text-xl font-bold">Pending...</p>
+              <p className="mt-2 text-center font-medium">
                 Your transaction is being processed
               </p>
             </div>
@@ -92,19 +92,19 @@ const MintTransaction = ({
         {failed ? (
           <>
             <div className="text-center">
-              <p className="text-center font-bold text-xl">
+              <p className="text-center text-xl font-bold">
                 Transaction failed
               </p>
-              <p className="text-center font-medium mt-2">Please try again</p>
+              <p className="mt-2 text-center font-medium">Please try again</p>
             </div>
           </>
         ) : null}
 
         {!pending && !failed ? (
           <>
-            <div className="my-2 text-center grid place-items-center">
+            <div className="my-2 grid place-items-center text-center">
               <>
-                <p className="text-center text-black relative text-xl md:text-3xl font-bold px-8 py-3 w-[315px] h-20 grid place-content-center rounded-[50%] ">
+                <p className="relative grid h-20 w-[315px] place-content-center rounded-[50%] px-8 py-3 text-center text-xl font-bold text-black md:text-3xl ">
                   Minted <br />
                 </p>
                 <p className="text-2xl font-normal">{title}! 🎉</p>
@@ -112,32 +112,32 @@ const MintTransaction = ({
             </div>
 
             <div className="my-0">
-              <p className="mt-8 font-bold text-[#000] text-xl text-center">
+              <p className="mt-8 text-center text-xl font-bold text-[#000]">
                 Share to earn referral fee
               </p>
-              <p className="font-medium mt-2">
+              <p className="mt-2 font-medium">
                 Earn 0.000111 ETH for every mint you refer - use the below
                 referral links
               </p>
 
-              <div className="flex justify-around items-center w-2/3 mx-auto my-8">
+              <div className="mx-auto my-8 flex w-2/3 items-center justify-around">
                 <CopyToClipboard
                   onCopy={() => {
                     toast.success("Copied to clipboard");
                   }}
                   text={`${shareUrl}`}
                 >
-                  <a className="w-14 cursor-pointer h-14 flex justify-center items-center bg-gray-200 rounded-full">
+                  <a className="flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-gray-200">
                     <LinkIcon className="h-5 w-5" strokeWidth={3} />
                   </a>
                 </CopyToClipboard>
                 <a
                   href={`https://twitter.com/intent/tweet?text=${encodeURI(
-                    shareText
+                    shareText,
                   )}&url=${shareUrl}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="w-14 cursor-pointer h-14 flex justify-center items-center bg-black rounded-full"
+                  className="flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-black"
                 >
                   <Image
                     src="/assets/icons/xlogo.svg"
@@ -149,10 +149,10 @@ const MintTransaction = ({
                 </a>
                 <a
                   href={`https://warpcast.com/~/compose?embeds[]=${shareUrl}&text=${encodeURI(
-                    shareText
+                    shareText,
                   )}`}
                   target="_blank"
-                  className="w-14 cursor-pointer h-14 flex justify-center items-center bg-[#855DCD] rounded-full"
+                  className="flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-[#855DCD]"
                 >
                   <Image
                     src="/assets/icons/flogo.svg"
@@ -167,7 +167,7 @@ const MintTransaction = ({
           </>
         ) : null}
 
-        <div className="min-w-[300px] mx-auto  max-w-[300px]">
+        <div className="mx-auto min-w-[300px]  max-w-[300px]">
           <Card
             className={className}
             title={title}
@@ -178,7 +178,7 @@ const MintTransaction = ({
         </div>
 
         {hash ? (
-          <p className="text-center my-5 text-neutral-500 font-bold">
+          <p className="my-5 text-center font-bold text-neutral-500">
             View on{" "}
             <a
               href={`${EXPLORER_LINK}/tx/${hash}`}
@@ -279,7 +279,7 @@ const NFTCard = ({
               resolveMain();
               return "Please, confirm the transaction to mint the NFT.";
             },
-          })
+          }),
         );
       }
 
@@ -306,7 +306,7 @@ const NFTCard = ({
 
       const priceInWei = ethers.utils.parseUnits(
         (eth_amount ?? 0).toString(),
-        "ether"
+        "ether",
       );
       const multiplier = ethers.utils.parseUnits(String(0.000777), "ether");
 
@@ -368,13 +368,13 @@ const NFTCard = ({
   };
 
   const shareUrl = `${DOMAIN}/maps/${slug}/?ref=${account.address}`;
-  const shareText = `Just minted ${title} on CheckIn!`;
+  const shareText = `Just minted "${title}" MAP NFT on Checkin to discover new places!`;
 
   return (
-    <div className="md:max-w-[320px] min-w-[250px] h-full">
+    <div className="h-full min-w-[250px] md:max-w-[320px]">
       <Dialog defaultOpen={defaultOpen}>
         <DialogContent
-          className="max-w-[600px] w-screen h-[100dvh] px-0 sm:px-6 z-40 max-h-[800px] bg-[#FFF8F0] overflow-y-scroll no-scrollbar"
+          className="no-scrollbar z-40 h-[100dvh] max-h-[800px] w-screen max-w-[600px] overflow-y-scroll bg-[#FFF8F0] px-0 sm:px-6"
           onInteractOutside={(e) => {
             if (disableOutsideInteraction) {
               e.preventDefault();
@@ -383,8 +383,8 @@ const NFTCard = ({
           }}
         >
           {!minted && (
-            <div className="flex flex-col justify-center items-center px-5 pt-5 bg-scroll">
-              <div className="min-w-[300px] max-w-[300px] relative">
+            <div className="flex flex-col items-center justify-center bg-scroll px-5 pt-5">
+              <div className="relative min-w-[300px] max-w-[300px]">
                 <Card
                   className={className}
                   title={title}
@@ -400,31 +400,31 @@ const NFTCard = ({
                 >
                   <button
                     tabIndex={-1}
-                    className="absolute top-0 sm:-top-2 -right-8 sm:-right-12 p-1 sm:p-2 flex items-center justify-center rounded-full shadow"
+                    className="absolute -right-8 top-0 flex items-center justify-center rounded-full p-1 shadow sm:-right-12 sm:-top-2 sm:p-2"
                   >
-                    <Share className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <Share className="h-4 w-4 sm:h-5 sm:w-5" />
                   </button>
                 </CopyToClipboard>
               </div>
               <div>
-                <div className="border border-gray-400 text-center p-3 mt-5">
+                <div className="mt-5 border border-gray-400 p-3 text-center">
                   <p>{price > 0 ? "" : "Free"} Mint on Base</p>
                   {Number(price) > 0 ? (
-                    <p className="text-xl font-bold mt-1">{price} ETH</p>
+                    <p className="mt-1 text-xl font-bold">{price} ETH</p>
                   ) : (
-                    <p className="text-xl font-bold mt-1">FREE</p>
+                    <p className="mt-1 text-xl font-bold">FREE</p>
                   )}
                 </div>
                 <Quantity count={count} setCount={setCount} />
               </div>
-              <div className="w-[280px] md:w-[400px] mt-0">
+              <div className="mt-0 w-[280px] md:w-[400px]">
                 <CostBreakdown count={count} price={price} />
 
-                <div className="text-center mt-10">
+                <div className="mt-10 text-center">
                   {(account.addresses ?? [])?.length > 0 ? (
                     <>
                       <button
-                        className="bg-[#5844C1] text-[#fff] border border-gray-900 py-2 px-5 w-full"
+                        className="w-full border border-gray-900 bg-[#5844C1] px-5 py-2 text-[#fff]"
                         onClick={mint}
                         disabled={mintedLoading}
                       >
@@ -434,7 +434,7 @@ const NFTCard = ({
                   ) : (
                     <div
                       style={{ zIndex: 100 }}
-                      className="connect-wallet cursor-pointer z-[100] bg-[#5844C1] text-[#000] border border-gray-900 py-2 px-5 w-full"
+                      className="connect-wallet z-[100] w-full cursor-pointer border border-gray-900 bg-[#5844C1] px-5 py-2 text-[#000]"
                       onClick={(e) => {
                         const el = e.target as HTMLElement;
                         el.querySelector("button")?.click();
@@ -445,7 +445,7 @@ const NFTCard = ({
                   )}
                 </div>
               </div>
-              <p className="mt-3 text-gray-500 text-sm">{userMinted} Minted</p>
+              <p className="mt-3 text-sm text-gray-500">{userMinted} Minted</p>
             </div>
           )}
           {minted && (
@@ -462,7 +462,7 @@ const NFTCard = ({
           )}
         </DialogContent>
 
-        <div className={hideCard ? "" : "h-full flex flex-col"}>
+        <div className={hideCard ? "" : "flex h-full flex-col"}>
           {hideCard ? null : (
             <Link href={`/maps/${slug}`} passHref className="h-full">
               <div>
@@ -485,14 +485,14 @@ const NFTCard = ({
                   {edit ? (
                     <Link
                       href={`/maps/edit/${property_id}`}
-                      className={`border text-center border-[#5844C1] py-2 mt-5 w-full disabled:opacity-50 bg-[#fff] text-[#5844C1]`}
+                      className={`mt-5 w-full border border-[#5844C1] bg-[#fff] py-2 text-center text-[#5844C1] disabled:opacity-50`}
                     >
                       Edit
                     </Link>
                   ) : (
                     <Link
                       href={`/maps/${slug}`}
-                      className={`border text-center border-[#5844C1] py-2 mt-5 w-full disabled:opacity-50 bg-[#fff] text-[#5844C1]`}
+                      className={`mt-5 w-full border border-[#5844C1] bg-[#fff] py-2 text-center text-[#5844C1] disabled:opacity-50`}
                     >
                       View
                     </Link>
@@ -503,8 +503,8 @@ const NFTCard = ({
                 <DialogTrigger asChild>
                   <button
                     className={cn(
-                      "border text-center border-[#5844C1] py-2 mt-5 w-full disabled:opacity-50 bg-[#5844C1] text-[#fff]",
-                      buttonClassName
+                      "mt-5 w-full border border-[#5844C1] bg-[#5844C1] py-2 text-center text-[#fff] disabled:opacity-50",
+                      buttonClassName,
                     )}
                   >
                     {mintButtonText}
@@ -542,7 +542,7 @@ const Card = ({
 }) => {
   return (
     <div
-      className={`h-full flex flex-col relative ${className}`}
+      className={`relative flex h-full flex-col ${className}`}
       style={{
         backgroundImage: `url(${imgUrl})`,
         backgroundSize: "cover",
@@ -555,10 +555,10 @@ const Card = ({
         }}
       >
         <div className="w-full ">
-          <div className="w-full aspect-square text-center flex flex-col justify-center">
-            <div className="text-center relative text-lg mt-5">
+          <div className="flex aspect-square w-full flex-col justify-center text-center">
+            <div className="relative mt-5 text-center text-lg">
               {imgUrl ? null : (
-                <div className="absolute text-6xl -top-16 left-1/2 -translate-x-1/2">
+                <div className="absolute -top-16 left-1/2 -translate-x-1/2 text-6xl">
                   <img src={emoji} alt="" />
                 </div>
               )}
@@ -571,14 +571,14 @@ const Card = ({
         <Link
           href={`/my-maps/${creator.wallet}`}
           passHref
-          className="flex gap-2 items-center mt-2"
+          className="mt-2 flex items-center gap-2"
         >
           <Image
             src={creator.farcaster?.imgUrl ?? "https://i.imgur.com/yZOyUGG.png"}
             alt={creator.farcaster?.name ?? ""}
             height={28}
             width={28}
-            className="rounded-full h-7 w-7 object-cover"
+            className="h-7 w-7 rounded-full object-cover"
           />
           <span className="text-sm">
             {creator.farcaster?.name ?? shortenAddress(creator.wallet)}
