@@ -13,14 +13,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 
+import { is_dev } from "@/config";
 import { usePathname } from "next/navigation";
 import { Toaster } from "sonner";
 import { http, WagmiProvider } from "wagmi";
-import { baseSepolia } from "wagmi/chains";
+import { base, baseSepolia } from "wagmi/chains";
 
 export const metadata: Metadata = {
   title: "Maps by Checkin",
-  description: "",
+  description: "Curate, Mint, Earn. Your Recommendations, onchain.",
 };
 
 const getSiweMessageOptions: GetSiweMessageOptions = () => ({
@@ -30,9 +31,9 @@ const getSiweMessageOptions: GetSiweMessageOptions = () => ({
 const config = getDefaultConfig({
   appName: "Maps by Checkin",
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
-  chains: [baseSepolia],
+  chains: [is_dev ? baseSepolia : base],
   transports: {
-    [baseSepolia.id]: http(),
+    [is_dev ? baseSepolia.id : base.id]: http(),
   },
 });
 
@@ -54,8 +55,8 @@ const Applayout = ({
           <RainbowKitSiweNextAuthProvider
             getSiweMessageOptions={getSiweMessageOptions}
           >
-            <RainbowKitProvider initialChain={baseSepolia.id}>
-              <div className="bg-custom-gray-30 text-[#000] pb-8">
+            <RainbowKitProvider initialChain={base.id}>
+              <div className="bg-custom-gray-30 pb-8 text-[#000]">
                 {pathName !== "/maintenance" ? (
                   <>
                     <Header />
