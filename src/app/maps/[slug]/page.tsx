@@ -181,14 +181,20 @@ const MapDetailsPage = async ({
             className="mt-6 flex items-center gap-2"
           >
             <Image
-              src={creator?.profile_image ?? "https://i.imgur.com/yZOyUGG.png"}
+              src={
+                creator?.profile_image !== ""
+                  ? creator.profile_image!
+                  : "https://i.imgur.com/yZOyUGG.png"
+              }
               alt={creator?.name ?? ""}
               height={28}
               width={28}
               className="h-7 w-7 rounded-full object-cover"
             />
             <span className="text-sm">
-              {creator.name ?? shortenAddress(map?.wallet_address ?? "")}
+              {creator.name !== ""
+                ? creator?.name
+                : shortenAddress(map?.wallet_address ?? "")}
             </span>
           </Link>
 

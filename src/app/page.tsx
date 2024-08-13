@@ -33,10 +33,10 @@ const getData = async (propertyId: string, secret: string) => {
     where: {
       map_id: {
         in: [
-          "557b7107-f020-493b-9c01-483b49876bcf",
-          "5cca9abb-5d94-471c-8277-55b3cab5f72b",
-          "80f8ee6e-1645-4557-85a9-97bc36a073b5",
-          "91ddd21c-96b5-412f-ba85-8872b1f4ce12",
+          "61ec5242-7f0e-4a40-89b8-4f671a2415ff",
+          "62b48d20-4e65-410e-84ef-3345d91872f1",
+          "b08b84a4-4609-41a1-b5d3-314952b555b0",
+          "1d5c1c67-5e83-4225-8176-602de2088cc4",
         ],
       },
     },

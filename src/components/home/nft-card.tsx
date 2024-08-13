@@ -574,14 +574,20 @@ const Card = ({
           className="mt-2 flex items-center gap-2"
         >
           <Image
-            src={creator.farcaster?.imgUrl ?? "https://i.imgur.com/yZOyUGG.png"}
-            alt={creator.farcaster?.name ?? ""}
+            src={
+              creator.farcaster?.imgUrl !== ""
+                ? creator.farcaster?.imgUrl!
+                : "https://i.imgur.com/yZOyUGG.png"
+            }
+            alt={creator.farcaster?.name !== "" ? creator.farcaster?.name! : ""}
             height={28}
             width={28}
             className="h-7 w-7 rounded-full object-cover"
           />
           <span className="text-sm">
-            {creator.farcaster?.name ?? shortenAddress(creator.wallet)}
+            {creator.farcaster?.name !== ""
+              ? creator.farcaster?.name
+              : shortenAddress(creator.wallet)}
           </span>
         </Link>
       </div>

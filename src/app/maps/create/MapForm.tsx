@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import ImageUpload from "@/components/ui/file-upload";
 import {
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -20,6 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { CHAIN_ID, CONTRACT_ADDRESS, RPC_PROVIDER } from "@/config";
 import { mapsABI } from "@/constants/maps";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { ethers } from "ethers";
 import { PlusIcon, X } from "lucide-react";
@@ -173,6 +175,8 @@ const MapForm = ({
     }[];
   };
 }) => {
+  const [creatorBio, setCreatorBio] = useState(bio);
+
   const [loading, setLoading] = useState(false);
   const [freeOption, setFreeOption] = useState(true);
   const { writeContractAsync, data } = useWriteContract();
@@ -217,6 +221,19 @@ const MapForm = ({
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      if (account.address && !creatorBio) {
+        const response = await fetch(`/api/account/${account.address}`);
+        const data = await response.json();
+        if (data.bio) {
+          setCreatorBio(data.bio);
+        }
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account.address]);
 
   const formSchema = formSchemaFn(values.map_id ? true : false);
 
@@ -351,257 +368,278 @@ const MapForm = ({
   return (
     <div className="mx-auto mb-8 mt-8 w-full max-w-7xl p-4 md:p-0">
       <div className="my-10 text-center text-2xl md:text-4xl">{heading}</div>
-      <div className="mt-24 grid gap-10 md:grid-cols-2">
-        <div className="space-y-5">
-          <FormProvider {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)} // Use handleSubmit from useForm
-              className="space-y-8"
-            >
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Map Name*</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    {form.formState.errors.name && (
-                      <div className="text-sm text-red-500">
-                        {form.formState.errors.name.message}
-                      </div>
-                    )}
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Map Description*</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-                    {form.formState.errors.description && (
-                      <div className="text-sm text-red-500">
-                        {form.formState.errors.description.message}
-                      </div>
-                    )}
-                  </FormItem>
-                )}
-              />
-
-              {bio || values.map_id ? null : (
-                <>
-                  <FormField
-                    control={form.control}
-                    name="creator_bio"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Creator Bio*</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
-
-              {values.map_id ? null : (
-                <div className="relative">
-                  <div className="absolute right-0">
-                    <label className="inline-flex cursor-pointer items-center">
-                      <input
-                        type="checkbox"
-                        value=""
-                        className="peer sr-only"
-                        checked={freeOption}
-                        onChange={() => {
-                          setFreeOption(!freeOption);
-
-                          if (!freeOption) {
-                            form.setValue("price", "0");
-                          }
-                        }}
-                      />
-                      <div className="peer relative h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-[#5844C1] peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-blue-800 rtl:peer-checked:after:-translate-x-full"></div>
-                      <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
-                        Free
-                      </span>
-                    </label>
-                  </div>
-                  <FormField
-                    control={form.control}
-                    name="price"
-                    disabled={freeOption}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Price in ETH</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              )}
-
-              <div>
-                <FormLabel className="mb-4 block">Thumbnail*</FormLabel>
-                <ImageUpload
-                  path="checkin-maps"
-                  label="Thumbnail"
-                  multimedia
-                  handleUploadFile={(e) => {
-                    form.setValue("thumbnail", e);
-                  }}
+      {!account.address ? (
+        <div className="grid place-items-center">
+          <p className="my-10 text-center text-xl">
+            Connect wallet to create your map!
+          </p>
+          <div className="connect-wallet grid min-h-[48px] place-items-center bg-[#5844C1] px-10">
+            <ConnectButton
+              showBalance={false}
+              accountStatus={"address"}
+              chainStatus={"icon"}
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="mt-24 grid gap-10 md:grid-cols-2">
+          <div className="space-y-5">
+            <FormProvider {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)} // Use handleSubmit from useForm
+                className="space-y-8"
+              >
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Map Name*</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      {form.formState.errors.name && (
+                        <div className="text-sm text-red-500">
+                          {form.formState.errors.name.message}
+                        </div>
+                      )}
+                    </FormItem>
+                  )}
                 />
-              </div>
 
-              <Popover>
-                <PopoverTrigger asChild>
-                  <div>
-                    <FormLabel className="mb-4 block">Map Emoji*</FormLabel>
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Map Description*</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} />
+                      </FormControl>
+                      {form.formState.errors.description && (
+                        <div className="text-sm text-red-500">
+                          {form.formState.errors.description.message}
+                        </div>
+                      )}
+                    </FormItem>
+                  )}
+                />
 
-                    <Button type="button" variant="outline">
-                      {emojiValue ? (
-                        <img src={emojiValue} className="mr-4 h-6 w-6" />
-                      ) : null}
-                      Select Emoji
-                    </Button>
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent className="w-full">
-                  <EmojiPicker
-                    emojiStyle={EmojiStyle.TWITTER}
-                    onEmojiClick={(e) => {
-                      form.setValue("emoji", e.imageUrl);
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
+                {creatorBio || values.map_id ? null : (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="creator_bio"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Creator Bio*</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            This bio can only be set once.
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
 
-              <div>
-                {fields.map((item, index) => (
-                  <PlaceCard
-                    key={item.id}
-                    property_id={item.property_id}
-                    placesMap={placesMap}
-                    removePlace={
-                      <button
-                        type="button"
-                        className="mt-2"
-                        onClick={() => remove(index)}
-                      >
-                        <X size={24} />{" "}
-                      </button>
-                    }
-                    placeSearch={
-                      <div className="pr-8">
-                        <Search
-                          setProperty={(property) => {
-                            update(index, {
-                              ...fields[index],
-                              property_id: property.property_id,
-                            });
+                {values.map_id ? null : (
+                  <div className="relative">
+                    <div className="absolute right-0">
+                      <label className="inline-flex cursor-pointer items-center">
+                        <input
+                          type="checkbox"
+                          value=""
+                          className="peer sr-only"
+                          checked={freeOption}
+                          onChange={() => {
+                            setFreeOption(!freeOption);
 
-                            const newPlacesMap = new Map(
-                              JSON.parse(JSON.stringify(Array.from(placesMap))),
-                            ) as typeof placesMap;
-                            newPlacesMap.set(property.property_id, {
-                              name: property.Locations.location ?? "",
-                              image: property.Locations.image ?? "",
-                              rating: property.Locations.rating ?? 0,
-                              category: property.Locations.category ?? "",
-                              coordinates: property.Locations.coordinates as {
-                                lat: number;
-                                lng: number;
-                              },
-                            });
-                            setPlacesMap(newPlacesMap);
+                            if (!freeOption) {
+                              form.setValue("price", "0");
+                            }
                           }}
                         />
-                      </div>
-                    }
-                    placeDescription={
-                      <FormField
-                        control={form.control}
-                        name={`places.${index}.description`}
-                        render={({ field }) => (
-                          <FormItem className="mt-5">
-                            <FormControl>
-                              <Textarea
-                                // {...field}
-                                minLength={15}
-                                {...form.register(
-                                  `places.${index}.description`,
-                                )}
-                                placeholder="Description of the place (min 15 characters)"
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    }
-                  />
-                ))}
-
-                <a
-                  className="mt-8 flex cursor-pointer items-center"
-                  onClick={() => {
-                    append({
-                      description: "",
-                      property_id: "",
-                    });
-                  }}
-                >
-                  <PlusIcon size={24} className="mr-2 text-[#EF9854]" />
-                  Add a Place
-                </a>
-                {form.formState.errors.places && (
-                  <div className="mt-2 text-sm text-red-500">
-                    {form.formState.errors.places.message}
+                        <div className="peer relative h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-[#5844C1] peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-blue-800 rtl:peer-checked:after:-translate-x-full"></div>
+                        <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+                          Free
+                        </span>
+                      </label>
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="price"
+                      disabled={freeOption}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Price in ETH</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 )}
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="connect-wallet grid min-h-[48px] w-full place-items-center bg-[#5844C1] text-[#fff]"
-              >
-                {loading ? "Loading..." : buttonText}
-              </button>
-            </form>
-          </FormProvider>
+
+                <div>
+                  <FormLabel className="mb-4 block">Thumbnail*</FormLabel>
+                  <ImageUpload
+                    path="checkin-maps"
+                    label="Thumbnail"
+                    multimedia
+                    handleUploadFile={(e) => {
+                      form.setValue("thumbnail", e);
+                    }}
+                  />
+                  <FormDescription>Recommended size: 500x500px</FormDescription>
+                </div>
+
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div>
+                      <FormLabel className="mb-4 block">Map Emoji*</FormLabel>
+
+                      <Button type="button" variant="outline">
+                        {emojiValue ? (
+                          <img src={emojiValue} className="mr-4 h-6 w-6" />
+                        ) : null}
+                        Select Emoji
+                      </Button>
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full">
+                    <EmojiPicker
+                      emojiStyle={EmojiStyle.TWITTER}
+                      onEmojiClick={(e) => {
+                        form.setValue("emoji", e.imageUrl);
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
+
+                <div>
+                  {fields.map((item, index) => (
+                    <PlaceCard
+                      key={item.id}
+                      property_id={item.property_id}
+                      placesMap={placesMap}
+                      removePlace={
+                        <button
+                          type="button"
+                          className="mt-2"
+                          onClick={() => remove(index)}
+                        >
+                          <X size={24} />{" "}
+                        </button>
+                      }
+                      placeSearch={
+                        <div className="pr-8">
+                          <Search
+                            setProperty={(property) => {
+                              update(index, {
+                                ...fields[index],
+                                property_id: property.property_id,
+                              });
+
+                              const newPlacesMap = new Map(
+                                JSON.parse(
+                                  JSON.stringify(Array.from(placesMap)),
+                                ),
+                              ) as typeof placesMap;
+                              newPlacesMap.set(property.property_id, {
+                                name: property.Locations.location ?? "",
+                                image: property.Locations.image ?? "",
+                                rating: property.Locations.rating ?? 0,
+                                category: property.Locations.category ?? "",
+                                coordinates: property.Locations.coordinates as {
+                                  lat: number;
+                                  lng: number;
+                                },
+                              });
+                              setPlacesMap(newPlacesMap);
+                            }}
+                          />
+                        </div>
+                      }
+                      placeDescription={
+                        <FormField
+                          control={form.control}
+                          name={`places.${index}.description`}
+                          render={({ field }) => (
+                            <FormItem className="mt-5">
+                              <FormControl>
+                                <Textarea
+                                  // {...field}
+                                  minLength={15}
+                                  {...form.register(
+                                    `places.${index}.description`,
+                                  )}
+                                  placeholder="Description of the place (min 15 characters)"
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      }
+                    />
+                  ))}
+
+                  <a
+                    className="mt-8 flex cursor-pointer items-center"
+                    onClick={() => {
+                      append({
+                        description: "",
+                        property_id: "",
+                      });
+                    }}
+                  >
+                    <PlusIcon size={24} className="mr-2 text-[#EF9854]" />
+                    Add a Place
+                  </a>
+                  {form.formState.errors.places && (
+                    <div className="mt-2 text-sm text-red-500">
+                      {form.formState.errors.places.message}
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="connect-wallet grid min-h-[48px] w-full place-items-center bg-[#5844C1] text-[#fff]"
+                >
+                  {loading ? "Loading..." : buttonText}
+                </button>
+              </form>
+            </FormProvider>
+          </div>
+          <div className="grid max-h-[800px] place-items-center">
+            <AppleMap
+              token={mapToken}
+              coordinatesArray={(() => {
+                const propertyIds = form
+                  .getValues()
+                  .places.map((place) => place.property_id);
+
+                let coordinates: {
+                  lat: number;
+                  lng: number;
+                }[] = [];
+
+                for (const propertyId of propertyIds) {
+                  const location = placesMap.get(propertyId);
+                  if (location?.coordinates)
+                    coordinates.push(location.coordinates);
+                }
+
+                return coordinates;
+              })()}
+            />
+          </div>
         </div>
-        <div className="grid max-h-[800px] place-items-center">
-          <AppleMap
-            token={mapToken}
-            coordinatesArray={(() => {
-              const propertyIds = form
-                .getValues()
-                .places.map((place) => place.property_id);
-
-              let coordinates: {
-                lat: number;
-                lng: number;
-              }[] = [];
-
-              for (const propertyId of propertyIds) {
-                const location = placesMap.get(propertyId);
-                if (location?.coordinates)
-                  coordinates.push(location.coordinates);
-              }
-
-              return coordinates;
-            })()}
-          />
-        </div>
-      </div>
+      )}
     </div>
   );
 };
