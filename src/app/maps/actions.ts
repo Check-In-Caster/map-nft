@@ -228,7 +228,6 @@ export async function updateMap({
         profile_image: farcasterProfile?.profileImage ?? "",
       },
       update: {
-        creator_bio: creator_bio,
         name: farcasterProfile?.profileName ?? "",
         profile_image: farcasterProfile?.profileImage ?? "",
       },
