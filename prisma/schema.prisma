@@ -8,21 +8,23 @@ datasource db {
 }
 
 model Locations {
-  location_id  String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  coordinates  Json?
-  location     String?
-  city         String?
-  country      String?
-  image        String?
-  category     String?
-  rating       Float?
-  map_url      String?
-  place_id     String?        @unique
-  latitude     Decimal?       @db.Decimal
-  longitude    Decimal?       @db.Decimal
-  address      String?
-  updated_at   DateTime?      @default(now()) @db.Timestamptz(6)
-  PropertyInfo PropertyInfo[]
+  location_id   String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  coordinates   Json?
+  location      String?
+  city          String?
+  country       String?
+  image         String?
+  category      String?
+  rating        Float?
+  map_url       String?
+  place_id      String?        @unique
+  latitude      Decimal?       @db.Decimal
+  longitude     Decimal?       @db.Decimal
+  updated_at    DateTime?      @default(now()) @db.Timestamptz(6)
+  address       String?
+  Checkin       Checkin[]
+  LocationMayor LocationMayor?
+  PropertyInfo  PropertyInfo[]
 }
 
 model PropertyInfo {
@@ -62,9 +64,10 @@ model Maps {
   wallet_address String
   map_emoji      String?
   token_id       String
-  total_minted   Decimal?        @default(0) @db.Decimal
+  total_minted   Decimal?        @default(1) @db.Decimal
   token_gated    Boolean?        @default(false)
   eth_amount     String?
+  order          Decimal?        @db.Decimal
   MapsCreator    MapsCreator     @relation(fields: [wallet_address], references: [wallet_address], onDelete: NoAction, onUpdate: NoAction)
   MapsCollected  MapsCollected[]
   MapsLiked      MapsLiked[]
@@ -115,6 +118,205 @@ model Settings {
 }
 
 model Checkin {
-  checkin_id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  checkin_id  String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fid         String
+  text        String?
+  embeds      Json?
+  timestamp   DateTime
+  parent_hash String?
+  location    String?
+  city        String?
+  country     String?
+  image       String?
+  category    String?
+  coordinates Json?
+  location_id String?     @db.Uuid
+  distance    Decimal?
+  user_id     String?     @db.Uuid
+  Bookmarks   Bookmarks[]
+  User        User        @relation(fields: [fid], references: [fid])
+  Locations   Locations?  @relation(fields: [location_id], references: [location_id])
+  Metadata    Metadata[]
+  PointsLog   PointsLog[]
+}
+
+model Airdrop {
+  airdrop_id      String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fid             String?
+  wallet_address  String?
+  farcon_attendee String?
+  checkin_points  String?
+  checkin_count   String?
+  tip_amount      String?
+  season          String? @default("0")
+  farcon_points   String?
+  special         Int?    @default(0)
+  first_property  String?
+  second_property String?
+  dpad_stake      String?
+  total_amount    String?
+}
+
+model AirdropExcelFinal {
+  airdrop_id      String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fid             String?
+  wallet_address  String?
+  farcon_attendee String?
+  checkin_points  String?
+  checkin_count   String?
+  tip_amount      String?
+  season          String?
+  farcon_points   String?
+  dpad_stake      String?
+  total_amount    BigInt?
+}
+
+model AirdropProperty {
+  id              Int     @id @default(autoincrement())
+  fid             String?
+  wallet_address  String?
+  first_property  String?
+  second_property String?
+  special         Int?    @default(0) @db.SmallInt
+}
+
+model Badge {
+  badge_id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fid              String
+  name             String?
+  image            String?
+  contract_address String?
+  tx_hash          String?
+  User             User    @relation(fields: [fid], references: [fid])
+}
+
+model BadgeCollected {
+  collected_id   String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tx_hash        String?
+  wallet_address String?
+  badge_id       String  @db.Uuid
+  level          Int?    @default(1)
+  progress       Int?    @default(0)
+  Badges         Badges  @relation(fields: [badge_id], references: [badge_id])
+}
+
+model Badges {
+  badge_id         String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String?
+  description      String?
+  image            String?
+  contract_address String?
+  collection       String?
+  order            Decimal?         @db.Decimal
+  mode             String?          @default("unlock")
+  type             String           @default("event")
+  category         String?
+  max_level        Int?
+  hide_on_profile  Boolean?         @default(false)
+  token_id         Int?
+  BadgeCollected   BadgeCollected[]
+}
+
+model Bookmarks {
+  bookmark_id     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fid             String
+  check_in_ref_id String    @db.Uuid
+  created_at      DateTime? @default(now()) @db.Timestamp(6)
+  user_id         String?   @db.Uuid
+  Checkin         Checkin   @relation(fields: [check_in_ref_id], references: [checkin_id])
+}
+
+model EventPromoNFTs {
+  event_id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  latitude         Decimal?  @db.Decimal
+  longitude        Decimal?  @db.Decimal
+  contract_address String
+  network          String?   @default("666666666")
+  start_at         DateTime?
+  end_at           DateTime?
+  status           Boolean   @default(true)
+  badge_id         String?   @db.Uuid
+  extra_points     Decimal?  @db.Decimal
+  source           String?   @default("bot")
+  map_url          String?
+}
+
+model LocationMayor {
+  location_id   String    @unique @db.Uuid
+  user_id       String    @db.Uuid
+  checkin_count Int?      @default(0)
+  Locations     Locations @relation(fields: [location_id], references: [location_id])
+}
+
+model Metadata {
+  metadata_id     String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  token_id        String
+  check_in_ref_id String  @db.Uuid
+  Checkin         Checkin @relation(fields: [check_in_ref_id], references: [checkin_id])
+}
+
+model PointsLog {
+  points_id  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   fid        String
+  points     Decimal  @db.Decimal(65, 5)
+  type       String
+  created_at DateTime @default(now())
+  checkin_id String?  @db.Uuid
+  revert     Boolean? @default(false)
+  user_id    String?  @db.Uuid
+  Checkin    Checkin? @relation(fields: [checkin_id], references: [checkin_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model ReferralCode {
+  code_id    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code       String    @unique
+  fid        String
+  used_by    String?
+  joined_at  DateTime?
+  created_at DateTime  @default(now())
+  user_id    String?   @db.Uuid
+  User       User?     @relation(fields: [used_by], references: [fid])
+}
+
+model ShortUrls {
+  id          String  @id
+  full_url    String  @unique
+  coordinates Json?
+  placeId     String?
+}
+
+model User {
+  fid             String         @id
+  username        String?
+  display_name    String?
+  pfp_url         String?
+  check_points    Decimal?       @default(0) @db.Decimal
+  wallet_address  String?
+  referral_fid    String?
+  ref_points      Decimal?       @default(0) @db.Decimal
+  is_disqualified Boolean?       @default(false)
+  user_id         String?        @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  Badge           Badge[]
+  Checkin         Checkin[]
+  ReferralCode    ReferralCode[]
+  reviews         reviews[]
+}
+
+model Waitlist {
+  id             Int      @id @default(autoincrement())
+  fid            Decimal? @db.Decimal
+  display_name   String?
+  username       String?
+  bio            String?
+  followers      Decimal? @db.Decimal
+  wallet_address String?
+}
+
+model reviews {
+  review_id String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rating    Float
+  comment   String?
+  fid       String
+  by        String?
+  User      User    @relation(fields: [fid], references: [fid])
 }
