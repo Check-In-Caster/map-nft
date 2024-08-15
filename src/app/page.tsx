@@ -20,9 +20,12 @@ const getData = async (propertyId: string, secret: string) => {
   }
 
   const trendingMaps = await prisma.maps.findMany({
-    orderBy: {
-      total_minted: "desc",
-    },
+    orderBy: [
+      {
+        total_minted: "desc",
+      },
+      { order: "asc" },
+    ],
     include: {
       MapsCreator: true,
     },

@@ -63,6 +63,7 @@ model Maps {
   map_emoji      String?
   token_id       String
   total_minted   Decimal?        @default(0) @db.Decimal
+  order          Decimal?        @db.Decimal
   token_gated    Boolean?        @default(false)
   eth_amount     String?
   MapsCreator    MapsCreator     @relation(fields: [wallet_address], references: [wallet_address], onDelete: NoAction, onUpdate: NoAction)
